@@ -13,6 +13,9 @@ on:
         required: true
         type: string
 
+env:
+  WORKING_DIR: ${{ github.workspace }}/Ecomm/Iac-aws/eks
+
 permissions:
   contents: read
   issues: write
@@ -25,7 +28,7 @@ jobs:
       image: hashicorp/terraform:1.5.0
     defaults:
       run:
-        working-directory: Ecomm/Iac-aws/eks
+        working-directory: ${{ env.WORKING_DIR }}
     permissions:
       id-token: write
       contents: read
