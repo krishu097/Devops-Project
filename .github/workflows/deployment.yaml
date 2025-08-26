@@ -25,7 +25,7 @@ jobs:
       image: hashicorp/terraform:1.5.0
     defaults:
       run:
-        working-directory: ../../iac-aws/eks
+        working-directory: Ecomm/Iac-aws/eks
     permissions:
       id-token: write
       contents: read
