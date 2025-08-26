@@ -1,0 +1,21 @@
+name: Deploy dev environment to Dev AWS Account
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  plan-and-apply-dev:
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+    uses: ./.github/workflows/deployment.yaml
+    with:
+      AWS_Deployment_Role_Arn: arn:aws:iam::345594569214:role/prj-github-terraform-iac-developer-role
+      Terraform_Backend_Configuration_File: tf_env/Backend_Config_Virginia.config
+      Terraform_Deployment_Configuration_File: tf_env/Dev_Deployment.tfvars
+    secrets: inherit
