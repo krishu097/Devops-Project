@@ -12,9 +12,12 @@ on:
       Terraform_Deployment_Configuration_File:
         required: true
         type: string
+      AWS_Region:
+        required: true
+        type: string
 
 env:
-  WORKING_DIR: ${{ github.workspace }}/Ecomm/Iac-aws/eks
+  WORKING_DIR: ${{ github.workspace }}/Ecomm/iac-aws/eks
 
 permissions:
   contents: read
@@ -37,17 +40,13 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.AWS_Deployment_Role_Arn }}
-          aws-region: us-east-1
+          aws-region: ${{ inputs.AWS_Region }}
 
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Verify environment
         run: |
-          echo "Listing Ecomm directory:"
-          ls -la Ecomm/
-          echo "Listing Ecomm/Iac-aws directory:"
-          ls -la Ecomm/Iac-aws/
           echo "Working directory: $(pwd)"
           terraform version
           ls -la
