@@ -3,9 +3,6 @@ name: Deploy dev environment to Dev AWS Account
 on:
   workflow_dispatch:
 
-env:
-  WORKING_DIR: ${{ github.workspace }}/Ecomm/Iac-aws/eks
-
 permissions:
   contents: read
   issues: write
