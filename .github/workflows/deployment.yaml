@@ -44,6 +44,10 @@ jobs:
 
       - name: Verify environment
         run: |
+          echo "Listing Ecomm directory:"
+          ls -la Ecomm/
+          echo "Listing Ecomm/Iac-aws directory:"
+          ls -la Ecomm/Iac-aws/
           echo "Working directory: $(pwd)"
           terraform version
           ls -la
