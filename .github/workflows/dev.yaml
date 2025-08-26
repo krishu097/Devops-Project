@@ -20,7 +20,7 @@ jobs:
     with:
       AWS_Deployment_Role_Arn: ${{ vars.AWS_ROLE_ARN_DEV }}
       AWS_Region: ${{ vars.AWS_REGION_DEV }}
-      WORKING_DIR: ${{ github.workspace }}/Ecomm/iac-aws/eks
+      WORKING_DIR: Ecomm/iac-aws/eks
       Terraform_Backend_Configuration_File: tf_env/Backend_Config_Virginia.config
       Terraform_Deployment_Configuration_File: tf_env/Dev_Deployment.tfvars
     secrets: inherit
