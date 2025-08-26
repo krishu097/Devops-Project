@@ -5,8 +5,6 @@ on:
 
 env:
   WORKING_DIR: ${{ github.workspace }}/Ecomm/Iac-aws/eks
-  AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN_DEV }}
-  AWS_REGION: ${{ vars.AWS_REGION_DEV }}
 
 permissions:
   contents: read
@@ -20,8 +18,9 @@ jobs:
       issues: write
     uses: ./.github/workflows/deployment.yaml
     with:
-      AWS_Deployment_Role_Arn: ${{ env.AWS_ROLE_ARN }}
-      AWS_Region: ${{ env.AWS_REGION }}
+      AWS_Deployment_Role_Arn: ${{ vars.AWS_ROLE_ARN_DEV }}
+      AWS_Region: ${{ vars.AWS_REGION_DEV }}
+      WORKING_DIR: ${{ github.workspace }}/Ecomm/iac-aws/eks
       Terraform_Backend_Configuration_File: tf_env/Backend_Config_Virginia.config
       Terraform_Deployment_Configuration_File: tf_env/Dev_Deployment.tfvars
     secrets: inherit
