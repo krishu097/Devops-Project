@@ -22,7 +22,9 @@ resource "aws_eks_cluster" "gmk-cluster" {
   tags = var.tags
 
   depends_on = [
-    aws_cloudwatch_log_group.eks
+    aws_cloudwatch_log_group.eks,
+    module.iam.cluster_iam_role_id,
+    module.iam.node_iam_role_id
   ]
 }
 

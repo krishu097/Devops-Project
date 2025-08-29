@@ -18,6 +18,11 @@ on:
       WORKING_DIR:
         required: true
         type: string
+      Action:
+        required: false
+        type: string
+        default: 'apply'
+        description: 'Terraform action to perform (apply or destroy)'
 
 permissions:
   contents: read
@@ -45,12 +50,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify environment
-        run: |
-          echo "Working directory: $(pwd)"
-          terraform version
-          ls -la
-
       - name: Terraform Init
         run: |
           rm -rf .terraform
@@ -59,29 +58,42 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan
+      - name: Check Action Type
+        id: check_action
+        run: |
+          if [ "${{ inputs.Action }}" = "destroy" ]; then
+            echo "action=destroy" >> $GITHUB_OUTPUT
+          else
+            echo "action=apply" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terraform Plan (for apply only)
+        if: steps.check_action.outputs.action == 'apply'
         run: |
           export TF_LOG=INFO
           terraform plan -out terraform.plan -input=false -lock=false -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
 
-      - name: Store plan
+      - name: Store plan (for apply only)
+        if: steps.check_action.outputs.action == 'apply'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: terraform.plan
 
-      - name: Terraform show
+      - name: Terraform Apply or Destroy
         run: |
-          terraform show -json > terraform_state.json
+          if [ "${{ inputs.Action }}" = "destroy" ]; then
+            echo "Performing Terraform Destroy..."
+            terraform destroy -auto-approve -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
+          else
+            echo "Performing Terraform Apply..."
+            terraform apply -auto-approve terraform.plan
+            terraform show -json > terraform_state.json
+          fi
 
-      - name: Upload Terraform state JSON
+      - name: Upload Terraform state JSON (for apply only)
+        if: steps.check_action.outputs.action == 'apply'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-state
           path: terraform_state.json
-
-      - name: Terraform Apply
-        run: |
-          export TF_LOG=INFO
-          terraform apply -auto-approve terraform.plan
-          terraform show -json > terraform_state.json
