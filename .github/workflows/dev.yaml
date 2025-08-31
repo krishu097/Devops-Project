@@ -20,5 +20,5 @@ jobs:
       WORKING_DIR: Ecomm/aws-iac/eks
       Terraform_Backend_Configuration_File: tf_env/Backend_Config_Virginia.config
       Terraform_Deployment_Configuration_File: tf_env/Dev_Deployment.tfvars
-      Action: destroy
+      Action: apply
     secrets: inherit
