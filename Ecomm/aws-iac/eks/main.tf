@@ -2,13 +2,13 @@
 module "vpc" {
   source = "./modules/vpc"
 
-  name_prefix        = local.name_prefix
-  vpc_cidr           = var.vpc_cidr
-  azs                = local.azs
-  environment        = var.environment
-  project_name       = var.project_name
-  enable_nat_gateway = true
-  #single_nat_gateway     = false
+  name_prefix            = local.name_prefix
+  vpc_cidr               = var.vpc_cidr
+  azs                    = local.azs
+  environment            = var.environment
+  project_name           = var.project_name
+  enable_nat_gateway     = true
+  single_nat_gateway     = true
   one_nat_gateway_per_az = false
 
   tags = local.common_tags
@@ -37,8 +37,8 @@ module "eks" {
   cluster_sg_id = module.vpc.cluster_security_group_id
 
   # IAM roles
-  cluster_iam_role_arn = module.iam.cluster_iam_role_id
-  node_iam_role_arn    = module.iam.node_iam_role_id
+  cluster_iam_role_arn = module.iam.cluster_iam_role_arn
+  node_iam_role_arn    = module.iam.node_iam_role_arn
 
   # Node Groups
   node_groups = var.node_groups
