@@ -61,6 +61,7 @@ jobs:
 
       - name: Terraform Init (with backend config)
         run: |
+          rm -rf .terraform
           terraform init -backend-config=${{ inputs.Terraform_Backend_Configuration_File }}
 
       - name: Terraform Validate
@@ -79,11 +80,11 @@ jobs:
           name: terraform-plan
           path: terraform.plan
 
-      # - name: Terraform Refresh (for destroy only)
-      #   if: steps.check_action.outputs.action == 'destroy'
-      #   run: |
-      #     echo "Refreshing Terraform state..."
-      #     terraform refresh -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
+      - name: Terraform Refresh (for destroy only)
+        if: steps.check_action.outputs.action == 'destroy'
+        run: |
+          echo "Refreshing Terraform state..."
+          terraform refresh -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
 
       - name: Terraform Apply or Destroy
         run: |
