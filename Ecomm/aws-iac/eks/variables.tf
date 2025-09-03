@@ -47,6 +47,9 @@ variable "node_groups" {
     min_size       = number
     max_size       = number
     instance_types = list(string)
+    ami_type       = string
+    disk_size      = number
+    capacity_type  = string
     labels         = map(string)
   }))
 

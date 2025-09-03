@@ -17,7 +17,11 @@ node_groups = {
     desired_size   = 2
     min_size       = 1
     max_size       = 3
-    instance_types = ["t3.small"]
+    instance_types = ["t3.medium"]
+    ami_type       = "AL2_x86_64"
+    disk_size      = 20
+    capacity_type  = "ON_DEMAND"
+
     labels = {
       role = "worker"
     }

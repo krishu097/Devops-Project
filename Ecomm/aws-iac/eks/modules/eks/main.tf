@@ -56,10 +56,9 @@ resource "aws_eks_node_group" "gmk-node-group" {
   }
 
   instance_types = each.value.instance_types
-  ami_type       = lookup(each.value, "ami_type", "AL2_x86_64")
-  disk_size      = lookup(each.value, "disk_size", 30)
-  capacity_type  = lookup(each.value, "capacity_type", "ON_DEMAND")
-
+  ami_type       = each.value.ami_type
+  disk_size      = each.value.disk_size
+  capacity_type  = each.value.capacity_type
 
   tags = merge(var.tags, {
     Name = "${each.value.name}-node-group"
