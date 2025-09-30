@@ -3,16 +3,19 @@ name: Terraform Deployment Module
 on:
   workflow_call:
     inputs:
-      AWS_Deployment_Role_Arn:
+      environment:
         required: true
         type: string
+      # AWS_Region:
+      #   required: true
+      #   type: string  
+      # AWS_Deployment_Role_Arn:
+      #   required: true
+      #   type: string
       Terraform_Backend_Configuration_File:
         required: true
         type: string
       Terraform_Deployment_Configuration_File:
-        required: true
-        type: string
-      AWS_Region:
         required: true
         type: string
       WORKING_DIR:
@@ -32,6 +35,7 @@ jobs:
   plan-and-apply-deployment:
     name: "Terraform Init, Validate, Plan, Upload State, Apply"
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     container:
       image: hashicorp/terraform:1.5.0
     defaults:
@@ -44,8 +48,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.AWS_Deployment_Role_Arn }}
-          aws-region: ${{ inputs.AWS_Region }}
+          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Checkout code
         uses: actions/checkout@v4
