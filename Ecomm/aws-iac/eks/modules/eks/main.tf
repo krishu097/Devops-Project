@@ -26,12 +26,11 @@ resource "aws_eks_cluster" "gmk-cluster" {
   ]
 }
 
-resource "aws_kms_key" "eks" {
-  description             = "EKS Secret Encryption Key"
-  deletion_window_in_days = 30
-  enable_key_rotation     = true
-
-  tags = var.tags
+encryption_config {
+  resources = ["secrets"]
+  provider {
+    key_arn = aws_kms_key.eks.arn
+  }
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
