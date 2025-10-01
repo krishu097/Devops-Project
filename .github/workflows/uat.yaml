@@ -1,4 +1,4 @@
-name: Deploy uat edfx environment to Dev AWS Account
+name: Deploy uat edfx AWS Account
 
 on:
   workflow_dispatch:
