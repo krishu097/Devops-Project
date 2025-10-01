@@ -27,11 +27,9 @@ resource "aws_eks_cluster" "gmk-cluster" {
 }
 
 encryption_config {
-  resources = ["secrets"]
-  provider {
-    key_arn = aws_kms_key.eks.arn
+    resources = ["secrets"]
+    provider {}
   }
-}
 
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
