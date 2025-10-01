@@ -1,4 +1,4 @@
-name: Deploy dev environment to Dev AWS Account
+name: Deploy to dev environment AWS Account
 
 on:
   workflow_dispatch:
