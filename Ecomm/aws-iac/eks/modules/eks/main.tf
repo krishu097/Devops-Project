@@ -12,13 +12,6 @@ resource "aws_eks_cluster" "gmk-cluster" {
 
   enabled_cluster_log_types = var.cluster_log_types
 
-  encryption_config {
-    resources = ["secrets"]
-    provider {
-      key_arn = aws_kms_key.eks.arn
-    }
-  }
-
   tags = var.tags
 
   depends_on = [
