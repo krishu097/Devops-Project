@@ -12,6 +12,13 @@ resource "aws_eks_cluster" "gmk-cluster" {
 
   enabled_cluster_log_types = var.cluster_log_types
 
+  encryption_config {
+    resources = ["secrets"]
+    provider {
+      key_arn = aws_kms_key.eks.arn
+    }
+  }
+
   tags = var.tags
 
   depends_on = [
@@ -19,6 +26,13 @@ resource "aws_eks_cluster" "gmk-cluster" {
   ]
 }
 
+resource "aws_kms_key" "eks" {
+  description             = "EKS Secret Encryption Key"
+  deletion_window_in_days = 30
+  enable_key_rotation     = true
+
+  tags = var.tags
+}
 
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
