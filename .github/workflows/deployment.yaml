@@ -6,12 +6,6 @@ on:
       environment:
         required: true
         type: string
-      # AWS_Region:
-      #   required: true
-      #   type: string  
-      # AWS_Deployment_Role_Arn:
-      #   required: true
-      #   type: string
       Terraform_Backend_Configuration_File:
         required: true
         type: string

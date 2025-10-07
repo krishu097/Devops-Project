@@ -16,8 +16,6 @@ jobs:
     uses: ./.github/workflows/deployment.yaml
     with:
       environment: uat-edfx
-      # AWS_Deployment_Role_Arn: ${{ secrets.AWS_ROLE_ARN_UAT }}
-      # AWS_Region: ${{ vars.AWS_REGION_UAT }}
       WORKING_DIR: Ecomm/aws-iac/eks
       Terraform_Backend_Configuration_File: tf_env/Backend_Uat_Config_Virginia.config
       Terraform_Deployment_Configuration_File: tf_env/Uat_Deployment.tfvars

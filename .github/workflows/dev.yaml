@@ -16,8 +16,6 @@ jobs:
     uses: ./.github/workflows/deployment.yaml
     with:
       environment: dev-self
-      # AWS_Deployment_Role_Arn: ${{ vars.AWS_ROLE_ARN_DEV }}
-      # AWS_Region: ${{ vars.AWS_REGION_DEV }}
       WORKING_DIR: Ecomm/aws-iac/eks
       Terraform_Backend_Configuration_File: tf_env/Backend_Dev_Config_Virginia.config
       Terraform_Deployment_Configuration_File: tf_env/Dev_Deployment.tfvars
