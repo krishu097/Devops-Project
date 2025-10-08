@@ -12,7 +12,7 @@ on:
 env:
   JAVA_VERSION: '17'
   ECR_REPOSITORY: 'business-management-app'
-  PROJECT_DIR: '${{ github.workspace }}/Devops-Project/Business_Management_Project'
+  PROJECT_DIR: '${{ github.workspace }}/Business_Management_Project'
 
   
 
