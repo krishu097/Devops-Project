@@ -43,7 +43,6 @@ jobs:
       with:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
-        # REMOVED cache setting completely
 
     - name: Wait for MySQL to be ready
       run: |
@@ -61,7 +60,10 @@ jobs:
         FLUSH PRIVILEGES;"
 
     - name: Run tests with MySQL
-      run: mvn test
+      run: |
+        echo "Current directory: $(pwd)"
+        ls -la
+        mvn test
       working-directory: ./Business_Management_Project
       env:
         SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/business_test
