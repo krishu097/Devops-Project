@@ -43,7 +43,7 @@ jobs:
       with:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
-        cache: 'maven'
+        # REMOVED cache setting completely
 
     - name: Wait for MySQL to be ready
       run: |
@@ -95,8 +95,7 @@ jobs:
       with:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
-        cache: 'maven'
-
+        # REMOVED cache setting completely
 
     - name: Build application JAR
       run: mvn clean package -DskipTests
