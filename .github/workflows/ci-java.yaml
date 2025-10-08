@@ -44,7 +44,6 @@ jobs:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
         cache: 'maven'
-        cache-dependency-path: Business_Management_Project/pom.xml
 
     - name: Wait for MySQL to be ready
       run: |
