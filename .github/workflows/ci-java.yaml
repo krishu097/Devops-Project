@@ -12,6 +12,8 @@ on:
 env:
   JAVA_VERSION: '17'
   ECR_REPOSITORY: 'business-management-app'
+  PROJECT_DIR: '${{ github.workspace }}/Business_Management_Project'
+  
 
 jobs:
   test:
@@ -61,10 +63,8 @@ jobs:
 
     - name: Run tests with MySQL
       run: |
-        echo "Current directory: $(pwd)"
-        ls -la
         mvn test
-      working-directory: ./Business_Management_Project
+      working-directory: ${{ env.PROJECT_DIR }}
       env:
         SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/business_test
         SPRING_DATASOURCE_USERNAME: test_user
