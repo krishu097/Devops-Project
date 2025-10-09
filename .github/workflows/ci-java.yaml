@@ -8,7 +8,7 @@ env:
   JAVA_VERSION: '17'
   ECR_REPOSITORY: 'business-management-app'
   PROJECT_DIR: '${{ github.workspace }}/Business_Management_Project'
-  environment: 'uat-edfx'
+  
 
   
 jobs:
@@ -77,6 +77,7 @@ jobs:
   build-and-push:
     name: Build and Push to ECR
     runs-on: ubuntu-latest
+    environment: ${{ vars.environment }}
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
@@ -97,6 +98,23 @@ jobs:
     - name: Build application JAR
       run: mvn clean package -DskipTests
       working-directory: ${{ env.PROJECT_DIR }}
+
+    - name: Generate Dockerfile
+      run: |
+            cat <<'EOF' > ${{ env.PROJECT_DIR }}/Dockerfile
+            FROM eclipse-temurin:17-jdk-alpine
+            WORKDIR /app
+            COPY target/*.jar app.jar
+            EXPOSE 8080
+            ENTRYPOINT ["java", "-jar", "app.jar"]
+            EOF
+    
+    - name: Verify Dockerfile and JAR
+      run: |
+        echo "=== Verifying Dockerfile ==="
+        cat ${{ env.PROJECT_DIR }}/Dockerfile
+        echo "=== Verifying JAR file ==="
+        ls -la ${{ env.PROJECT_DIR }}/target/*.jar
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
