@@ -97,6 +97,14 @@ jobs:
         java-version: ${{ env.JAVA_VERSION }}
         distribution: 'temurin'
 
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
     - name: Build application JAR
       run: mvn clean package -DskipTests
       working-directory: ${{ env.PROJECT_DIR }}
@@ -144,6 +152,21 @@ jobs:
           --tag ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest \
           .
       working-directory: ${{ env.PROJECT_DIR }}
+
+    - name: Run Trivy vulnerability scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.meta.outputs.version }}'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        exit-code: 1
+        severity: 'CRITICAL,HIGH' 
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()  # Upload results even if scan fails
+      with:
+        sarif_file: 'trivy-results.sarif'
 
     - name: Push Docker image to ECR
       run: |
