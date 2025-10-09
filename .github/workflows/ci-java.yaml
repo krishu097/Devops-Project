@@ -59,6 +59,10 @@ jobs:
         GRANT ALL PRIVILEGES ON business_test.* TO 'test_user'@'%';
         FLUSH PRIVILEGES;"
 
+    - name: Lint Java code with Checkstyle
+      run: mvn checkstyle:checkstyle
+      working-directory: ${{ env.PROJECT_DIR }
+
     - name: Run tests with MySQL
       run: |
         mvn test
@@ -173,7 +177,7 @@ jobs:
         path: |
           trivy-results.sarif
         retention-days: 30
-        
+
     - name: Push Docker image to ECR
       if: steps.trivy-scan.outcome == 'success'
       run: |
