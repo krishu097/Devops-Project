@@ -61,7 +61,7 @@ jobs:
 
     - name: Lint Java code with Checkstyle
       run: mvn checkstyle:checkstyle
-      working-directory: ${{ env.PROJECT_DIR }
+      working-directory: ${{ env.PROJECT_DIR }}
 
     - name: Run tests with MySQL
       run: |
@@ -177,7 +177,7 @@ jobs:
         path: |
           trivy-results.sarif
         retention-days: 30
-
+        
     - name: Push Docker image to ECR
       if: steps.trivy-scan.outcome == 'success'
       run: |
