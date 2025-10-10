@@ -65,7 +65,7 @@ jobs:
 
     - name: Run tests with MySQL
       run: |
-        mvn clean verify -DskipTests
+        mvn clean verify
       working-directory: ${{ env.PROJECT_DIR }}
       env:
         SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/business_test
