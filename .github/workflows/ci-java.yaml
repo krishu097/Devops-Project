@@ -109,8 +109,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    - name: Build application JAR
-      run: mvn clean package -DskipTests
+    - name: Build and compile for analysis
+      run: mvn clean compile -DskipTests
       working-directory: ${{ env.PROJECT_DIR }}
 
     - name: Run SonarQube Scan
@@ -122,6 +122,13 @@ jobs:
           -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
           -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
           -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
+           -Dsonar.sources=${{ env.PROJECT_DIR }}/src
+          -Dsonar.sourceEncoding=UTF-8
+
+    - name: Build application JAR for deployment
+      run: mvn package -DskipTests
+      working-directory: ${{ env.PROJECT_DIR }}
 
     - name: Generate Dockerfile
       run: |
