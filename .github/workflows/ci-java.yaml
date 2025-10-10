@@ -80,6 +80,16 @@ jobs:
         path: Business_Management_Project/target/surefire-reports/
         retention-days: 7
 
+    - name: Run SonarQube Scan
+      uses: SonarSource/sonarcloud-github-action@v2
+      with:
+        args: >
+          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
+
   build-and-push:
     name: Build and Push to ECR
     runs-on: ubuntu-latest
@@ -119,7 +129,7 @@ jobs:
             FROM eclipse-temurin:17-jdk-alpine
             WORKDIR /app
             COPY target/*.jar app.jar
-            EXPOSE 8080
+            EXPOSE 2330
             ENTRYPOINT ["java", "-jar", "app.jar"]
             EOF
     
