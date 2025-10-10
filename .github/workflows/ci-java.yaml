@@ -87,9 +87,8 @@ jobs:
           -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
           -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
           -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
           -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
-          env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build-and-push:
     name: Build and Push to ECR
