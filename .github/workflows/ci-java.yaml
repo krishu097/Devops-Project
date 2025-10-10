@@ -123,7 +123,7 @@ jobs:
           -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
-           -Dsonar.sources=${{ env.PROJECT_DIR }}/src
+          -Dsonar.sources=${{ env.PROJECT_DIR }}/src
           -Dsonar.sourceEncoding=UTF-8
 
     - name: Build application JAR for deployment
