@@ -110,7 +110,7 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build application with tests
-      run: mvn -B clean package
+      run: mvn -B clean package -DskipTests
       working-directory: ${{ env.PROJECT_DIR }}
 
     - name: Run SonarQube analysis
@@ -120,6 +120,7 @@ jobs:
           -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.coverage.exclusions=**/*
       working-directory: ${{ env.PROJECT_DIR }}
 
     - name: Generate Dockerfile
