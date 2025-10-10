@@ -62,7 +62,7 @@ jobs:
     - name: Lint Java code with Checkstyle
       run: mvn checkstyle:checkstyle
       working-directory: ${{ env.PROJECT_DIR }}
-      
+
     - name: Cache SonarQube packages
       uses: actions/cache@v4
       with:
@@ -86,10 +86,11 @@ jobs:
         SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
       run: |
         mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=krishu097_business-management-app \
-          -Dsonar.organization=krishu097 \
+          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
+          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
           -Dsonar.host.url=https://sonarcloud.io
       working-directory: ${{ env.PROJECT_DIR }}
+    
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -127,8 +128,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    - name: Build application JAR for deployment
-      run: mvn package -DskipTests
+    - name: Build application JAR
+      run: mvn clean package -DskipTests
       working-directory: ${{ env.PROJECT_DIR }}
 
     - name: Generate Dockerfile
