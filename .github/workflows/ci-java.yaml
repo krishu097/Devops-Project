@@ -122,7 +122,6 @@ jobs:
           -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
           -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
           -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
 
     - name: Generate Dockerfile
       run: |
