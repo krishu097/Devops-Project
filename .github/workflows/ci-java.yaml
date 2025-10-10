@@ -62,16 +62,34 @@ jobs:
     - name: Lint Java code with Checkstyle
       run: mvn checkstyle:checkstyle
       working-directory: ${{ env.PROJECT_DIR }}
+      
+    - name: Cache SonarQube packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
 
-    - name: Run tests with MySQL
-      run: |
-        mvn test
-      working-directory: ${{ env.PROJECT_DIR }}
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Run tests with MySQL and Sonar analysis
       env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/business_test
         SPRING_DATASOURCE_USERNAME: test_user
         SPRING_DATASOURCE_PASSWORD: test_password
         SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      run: |
+        mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=krishu097_business-management-app \
+          -Dsonar.organization=krishu097 \
+          -Dsonar.host.url=https://sonarcloud.io
+      working-directory: ${{ env.PROJECT_DIR }}
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -108,23 +126,6 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-
-    - name: Build and compile for analysis
-      run: mvn clean compile -DskipTests
-      working-directory: ${{ env.PROJECT_DIR }}
-
-    - name: Run SonarQube Scan
-      uses: SonarSource/sonarcloud-github-action@v2
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        args: >
-          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
-          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-          -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
-          -Dsonar.sources=${{ env.PROJECT_DIR }}/src
-          -Dsonar.sourceEncoding=UTF-8
 
     - name: Build application JAR for deployment
       run: mvn package -DskipTests
