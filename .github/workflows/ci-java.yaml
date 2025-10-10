@@ -80,16 +80,6 @@ jobs:
         path: Business_Management_Project/target/surefire-reports/
         retention-days: 7
 
-    - name: Run SonarQube Scan
-      uses: SonarSource/sonarcloud-github-action@v2
-      with:
-        args: >
-          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
-          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-          -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-          -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
-
   build-and-push:
     name: Build and Push to ECR
     runs-on: ubuntu-latest
@@ -122,6 +112,17 @@ jobs:
     - name: Build application JAR
       run: mvn clean package -DskipTests
       working-directory: ${{ env.PROJECT_DIR }}
+
+    - name: Run SonarQube Scan
+      uses: SonarSource/sonarcloud-github-action@v2
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.java.binaries=${{ env.PROJECT_DIR }}/target/classes
 
     - name: Generate Dockerfile
       run: |
