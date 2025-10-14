@@ -22,3 +22,4 @@ jobs:
       Terraform_Deployment_Configuration_File: tf_env/Uat_Deployment.tfvars
       Action: destroy
     secrets: inherit
+    
