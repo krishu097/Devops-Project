@@ -1,5 +1,5 @@
 output "oidc_provider_id" {
-  value = aws_iam_openid_connect_provider.gmk-oidc-provider[0].id
+  value = aws_iam_openid_connect_provider.eks[0].id
 }
 output "cluster_iam_role_arn" {
   description = "ARN of the EKS cluster IAM role"
@@ -13,5 +13,5 @@ output "node_iam_role_arn" {
 
 output "eks_access_ecr_role_arn" {
   description = "ARN of the IAM role for EKS to access ECR"
-  value       = aws_iam_role.eks_ecr_access.arn
+  value       = aws_iam_role.eks_ecr_access_role.arn
 }
