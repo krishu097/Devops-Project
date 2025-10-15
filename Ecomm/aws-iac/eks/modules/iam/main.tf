@@ -63,7 +63,7 @@ resource "aws_iam_role" "eks_ecr_access_role" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = var.oidc_provider_url
+          Federated = aws_iam_openid_connect_provider.eks.arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
