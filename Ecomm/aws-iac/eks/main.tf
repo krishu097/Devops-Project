@@ -40,6 +40,7 @@ module "eks" {
   cluster_iam_role_arn = module.iam.cluster_iam_role_arn
   node_iam_role_arn    = module.iam.node_iam_role_arn
   eks_ecr_access_role  = module.iam.eks_access_ecr_role_arn
+  ebs_csi_driver_role  = module.iam.ebs_csi_driver_role_arn
   
 
   # Node Groups

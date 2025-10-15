@@ -63,3 +63,8 @@ variable "eks_ecr_access_role" {
   description = "The IAM role ARN for EKS to access ECR"
   type        = string
 }
+
+variable "ebs_csi_driver_role" {
+  description = "The IAM role ARN for EBS CSI Driver"
+  type        = string
+}

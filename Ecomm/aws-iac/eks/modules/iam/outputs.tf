@@ -15,3 +15,8 @@ output "eks_access_ecr_role_arn" {
   description = "ARN of the IAM role for EKS to access ECR"
   value       = aws_iam_role.eks_ecr_access_role.arn
 }
+
+output "ebs_csi_driver_role_arn" {
+  description = "ARN of the IAM role for EBS CSI Driver"
+  value       = aws_iam_role.ebs_csi_driver.arn
+}

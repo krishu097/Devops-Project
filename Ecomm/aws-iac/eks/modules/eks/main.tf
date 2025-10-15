@@ -19,19 +19,30 @@ resource "aws_eks_cluster" "gmk-cluster" {
   ]
 }
 
-resource "aws_eks_addon" "aws_ebs_csi_driver" {
-  cluster_name = aws_eks_cluster.gmk-cluster.name
-  addon_name   = "aws-ebs-csi-driver"
-  
-  addon_version = "v1.32.0-eksbuild.1" 
+resource "aws_eks_addon" "ebs_csi_driver" {
+  cluster_name  = aws_eks_cluster.gmk-cluster.name
+  addon_name    = "aws-ebs-csi-driver"
+  addon_version = "v1.32.0-eksbuild.1"
 
-  service_account_role_arn = ""
-  
-  tags = var.tags
-  
+  service_account_role_arn = var.ebs_csi_driver_role
+
+  resolve_conflicts = "OVERWRITE"
+  tags              = var.tags
+
   depends_on = [
-    aws_eks_node_group.gmk-node-group
+    aws_eks_node_group.gmk-node-group,
+    kubernetes_service_account.ebs_csi_sa
   ]
+}
+
+resource "kubernetes_service_account" "ebs_csi_sa" {
+  metadata {
+    name      = "ebs-csi-controller-sa"
+    namespace = "kube-system"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = var.ebs_csi_driver_role
+    }
+  }
 }
 
 resource "kubernetes_service_account" "ecr_pull_sa" {
