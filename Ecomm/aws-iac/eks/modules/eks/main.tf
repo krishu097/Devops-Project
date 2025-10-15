@@ -25,17 +25,7 @@ resource "aws_eks_addon" "aws_ebs_csi_driver" {
   
   addon_version = "v1.32.0-eksbuild.1" 
 
-  configuration_values = jsonencode({
-    controller = {
-      serviceAccount = {
-        create = true
-        name   = "ebs-csi-controller-sa"
-        annotations = {
-          "eks.amazonaws.com/sts-regional-endpoints" = "true"
-        }
-      }
-    }
-  })
+  service_account_role_arn = ""
   
   tags = var.tags
   
