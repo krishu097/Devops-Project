@@ -12,13 +12,6 @@ resource "aws_eks_cluster" "gmk-cluster" {
 
   enabled_cluster_log_types = var.cluster_log_types
 
-  encryption_config {
-    resources = ["secrets"]
-    provider {
-      key_arn = aws_kms_key.eks.arn
-    }
-  }
-
   tags = var.tags
 
   depends_on = [
@@ -26,12 +19,27 @@ resource "aws_eks_cluster" "gmk-cluster" {
   ]
 }
 
-resource "aws_kms_key" "eks" {
-  description             = "EKS Secret Encryption Key"
-  deletion_window_in_days = 30
-  enable_key_rotation     = true
-
+resource "aws_eks_addon" "aws_ebs_csi_driver" {
+  cluster_name = aws_eks_cluster.gmk-cluster.name
+  addon_name   = "aws-ebs-csi-driver"
+  
+  addon_version = "v1.32.0-eksbuild.1" 
+  
   tags = var.tags
+  
+  depends_on = [
+    aws_eks_node_group.gmk-node-group
+  ]
+}
+
+resource "kubernetes_service_account" "ecr_pull_sa" {
+  metadata {
+    name      = "ecr-pull-sa"
+    namespace = "default"  
+    annotations = {
+      "eks.amazonaws.com/role-arn" = var.eks_ecr_access_role
+    }
+  }
 }
 
 resource "aws_cloudwatch_log_group" "eks" {

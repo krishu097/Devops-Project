@@ -24,6 +24,64 @@ resource "aws_iam_role" "cluster" {
   tags = var.tags
 }
 
+
+data "aws_ecr_repository" "business_mgmt_repo" {
+  name = "business-management-app"
+}
+
+resource "aws_iam_policy" "eks_ecr_access_policy" {
+  name        = "EKSECRAccessPolicy"
+  description = "Allow EKS workloads to pull images from private ECR"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability"
+        ]
+        Resource = data.aws_ecr_repository.business_mgmt_repo.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = "ecr:GetAuthorizationToken"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "eks_ecr_access_role" {
+  name = "eks-ecr-access-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = var.oidc_provider_url
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(var.oidc_provider_url, "https://", "")}:sub" = "system:serviceaccount:default:ecr-pull-sa"
+          }
+        }
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy_attachment" "eks_ecr_attach" {
+  role       = aws_iam_role.eks_ecr_access_role.name
+  policy_arn = aws_iam_policy.eks_ecr_access_policy.arn
+}
+
 resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.cluster.name
@@ -71,11 +129,13 @@ resource "aws_iam_role_policy_attachment" "node_AmazonSSMManagedInstanceCore" {
   role       = aws_iam_role.node.name
 }
 
-# OIDC Provider for IRSA
-resource "aws_iam_openid_connect_provider" "gmk-oidc-provider" {
-  count = var.enable_irsa ? 1 : 0
-
-  url             = var.oidc_provider_url
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da2b0ab7280"]
+data "tls_certificate" "oidc" {
+  url = var.oidc_provider_url
 }
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.oidc.certificates[0].sha1_fingerprint
+  url             = var.oidc_provider_url
+}
+

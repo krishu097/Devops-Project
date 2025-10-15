@@ -59,3 +59,7 @@ variable "tags" {
 
 }
 
+variable "eks_ecr_access_role" {
+  description = "The IAM role ARN for EKS to access ECR"
+  type        = string
+}
