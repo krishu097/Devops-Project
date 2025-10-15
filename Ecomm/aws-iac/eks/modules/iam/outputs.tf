@@ -1,5 +1,5 @@
 output "oidc_provider_id" {
-  value = aws_iam_openid_connect_provider.eks[0].id
+  value = aws_iam_openid_connect_provider.eks.id
 }
 output "cluster_iam_role_arn" {
   description = "ARN of the EKS cluster IAM role"
