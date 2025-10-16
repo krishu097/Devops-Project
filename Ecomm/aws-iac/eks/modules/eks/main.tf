@@ -85,6 +85,12 @@ resource "aws_eks_node_group" "gmk-node-group" {
     Name = "${each.value.name}-node-group"
   })
 
+instance_tags = merge(
+    var.tags,
+    {
+      Name = "${each.value.name}-node"
+    }
+  )
   depends_on = [
     aws_eks_cluster.gmk-cluster
   ]
