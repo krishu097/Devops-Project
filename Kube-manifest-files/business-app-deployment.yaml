@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-management-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: business-management-app
+  template:
+    metadata:
+      labels:
+        app: business-management-app
+    spec:
+      serviceAccountName: ecr-pull-sa
+      # Init container to wait for MySQL
+      initContainers:
+      - name: check-mysql
+        image: mysql:8.0
+        command: ['sh', '-c', 
+                  'until mysqladmin ping -h mysql-service -u root -p${MYSQL_ROOT_PASSWORD} 2>/dev/null; do echo waiting for mysql; sleep 2; done;']
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
+      containers:
+      - name: business-management-app
+        image: 361509912577.dkr.ecr.us-east-2.amazonaws.com/business-management-app:latest
+        ports:
+        - containerPort: 2330
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "test"
+        # MySQL Configuration
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/businessproject?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: "com.mysql.cj.jdbc.Driver"
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
+        - name: SERVER_PORT
+          value: "2330"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1024Mi"
+            cpu: "500m"
+        livenessProbe:
+          tcpSocket:
+            port: 2330
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          tcpSocket:
+            port: 2330
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 3
