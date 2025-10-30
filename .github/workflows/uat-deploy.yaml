@@ -2,7 +2,15 @@ name: Deploy uat edfx AWS Account
 
 on:
   workflow_dispatch:
-    
+    inputs:
+      Action:
+        description: "Select Terraform Action"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+        default: apply
 
 permissions:
   contents: read
@@ -20,6 +28,5 @@ jobs:
       WORKING_DIR: Ecomm/aws-iac/eks
       Terraform_Backend_Configuration_File: tf_env/Backend_Uat_Config_Virginia.config
       Terraform_Deployment_Configuration_File: tf_env/Uat_Deployment.tfvars
-      Action: destroy
+      Action: ${{ github.event.inputs.Action }}
     secrets: inherit
-    

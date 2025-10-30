@@ -18,8 +18,14 @@ on:
       Action:
         required: false
         type: string
-        default: 'apply'
-        description: 'Terraform action to perform (apply or destroy)'
+        default: "apply"
+        description: "Terraform action to perform (apply or destroy)"
+
+  push:
+    paths:
+      - "Ecomm/aws-iac/eks/**"
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -101,4 +107,3 @@ jobs:
         with:
           name: terraform-state
           path: terraform_state.json
-          
