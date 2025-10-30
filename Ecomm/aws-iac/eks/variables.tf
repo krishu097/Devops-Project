@@ -39,6 +39,12 @@ variable "cluster_enabled_log_types" {
   default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
+variable "ebs-addon-version" {
+  description = "EBS CSI Driver Addon Version"
+  type        = string
+
+}
+
 variable "node_groups" {
   description = "A map of node group configurations"
   type = map(object({

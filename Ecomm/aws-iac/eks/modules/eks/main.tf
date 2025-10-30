@@ -22,7 +22,7 @@ resource "aws_eks_cluster" "gmk-cluster" {
 resource "aws_eks_addon" "ebs_csi_driver" {
   cluster_name  = aws_eks_cluster.gmk-cluster.name
   addon_name    = "aws-ebs-csi-driver"
-  addon_version = "v1.32.0-eksbuild.1"
+  addon_version = var.ebs-addon-version
 
   service_account_role_arn = var.ebs_csi_driver_role
 
