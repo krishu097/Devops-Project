@@ -39,6 +39,11 @@ variable "eks_ecr_access_role" {
   description = "ecr access role arn"
   type        = string
 }
+variable "ebs-addon-version" {
+  description = "EBS CSI Driver Addon Version"
+  type        = string
+
+}
 
 variable "node_groups" {
   description = "The node groups for the EKS cluster"

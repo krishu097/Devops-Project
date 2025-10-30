@@ -1,30 +1,78 @@
+##############################################################################################
 resource "aws_iam_role" "cluster" {
   name = "${var.name_prefix}-eks-cluster-role"
 
   assume_role_policy = jsonencode({
+    Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
         Effect = "Allow"
+        Action = "sts:AssumeRole"
         Principal = {
           Service = "eks.amazonaws.com"
         }
-      },
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::345594569214:user/gmk_990"
-        }
       }
     ]
-    Version = "2012-10-17"
   })
 
   tags = var.tags
 }
 
+resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.cluster.name
+}
 
+resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSVPCResourceController" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+  role       = aws_iam_role.cluster.name
+}
+
+resource "aws_iam_role_policy_attachment" "aws_cloudwatch_log_groups" {
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  role       = aws_iam_role.cluster.name
+}
+##############################################################################################
+
+resource "aws_iam_role" "node" {
+  name = "${var.name_prefix}-eks-node-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRole"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEKSWorkerNodePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.node.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.node.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.node.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonSSMManagedInstanceCore" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.node.name
+}
+########################CUSTOM-POLICIES#####################################################
 data "aws_ecr_repository" "business_mgmt_repo" {
   name = "business-management-app"
 }
@@ -76,6 +124,11 @@ resource "aws_iam_role" "eks_ecr_access_role" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "eks_ecr_attach" {
+  role       = aws_iam_role.eks_ecr_access_role.name
+  policy_arn = aws_iam_policy.eks_ecr_access_policy.arn
+}
+########################EBS-CSI-DRIVER-POLICY#####################################################
 data "aws_iam_policy_document" "ebs_csi_assume_role" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -105,57 +158,7 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver_policy" {
 }
 
 
-resource "aws_iam_role_policy_attachment" "eks_ecr_attach" {
-  role       = aws_iam_role.eks_ecr_access_role.name
-  policy_arn = aws_iam_policy.eks_ecr_access_policy.arn
-}
 
-resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.cluster.name
-}
-
-resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSVPCResourceController" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.cluster.name
-}
-
-resource "aws_iam_role" "node" {
-  name = "${var.name_prefix}-eks-node-role"
-
-  assume_role_policy = jsonencode({
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-    Version = "2012-10-17"
-  })
-
-  tags = var.tags
-}
-
-resource "aws_iam_role_policy_attachment" "node_AmazonEKSWorkerNodePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.node.name
-}
-
-resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.node.name
-}
-
-resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOnly" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.node.name
-}
-
-resource "aws_iam_role_policy_attachment" "node_AmazonSSMManagedInstanceCore" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = aws_iam_role.node.name
-}
 
 data "tls_certificate" "oidc" {
   url = var.oidc_provider_url

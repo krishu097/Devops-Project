@@ -44,6 +44,7 @@ module "eks" {
 
 
   # Node Groups
-  node_groups = var.node_groups
-  tags        = local.common_tags
+  node_groups       = var.node_groups
+  ebs-addon-version = var.ebs-addon-version
+  tags              = local.common_tags
 }
