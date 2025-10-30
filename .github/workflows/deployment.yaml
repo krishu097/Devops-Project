@@ -21,12 +21,6 @@ on:
         default: "apply"
         description: "Terraform action to perform (apply or destroy)"
 
-  push:
-    paths:
-      - "Ecomm/aws-iac/eks/**"
-    branches:
-      - main
-
 permissions:
   contents: read
   issues: write
