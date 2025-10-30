@@ -30,6 +30,16 @@ variable "cluster_log_types" {
   type        = list(string)
 }
 
+variable "ebs_csi_driver_role" {
+  description = "ebs csi driver role arn"
+  type        = string
+}
+
+variable "eks_ecr_access_role" {
+  description = "ecr access role arn"
+  type        = string
+}
+
 variable "node_groups" {
   description = "The node groups for the EKS cluster"
   type = map(object({
@@ -59,12 +69,3 @@ variable "tags" {
 
 }
 
-variable "eks_ecr_access_role" {
-  description = "The IAM role ARN for EKS to access ECR"
-  type        = string
-}
-
-variable "ebs_csi_driver_role" {
-  description = "The IAM role ARN for EBS CSI Driver"
-  type        = string
-}

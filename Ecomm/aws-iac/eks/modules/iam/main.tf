@@ -37,8 +37,8 @@ resource "aws_iam_policy" "eks_ecr_access_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:BatchCheckLayerAvailability"
@@ -166,4 +166,3 @@ resource "aws_iam_openid_connect_provider" "eks" {
   thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
   url             = var.oidc_provider_url
 }
-

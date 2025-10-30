@@ -48,7 +48,7 @@ resource "kubernetes_service_account" "ebs_csi_sa" {
 resource "kubernetes_service_account" "ecr_pull_sa" {
   metadata {
     name      = "ecr-pull-sa"
-    namespace = "default"  
+    namespace = "default"
     annotations = {
       "eks.amazonaws.com/role-arn" = var.eks_ecr_access_role
     }
