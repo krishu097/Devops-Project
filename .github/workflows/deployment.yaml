@@ -84,19 +84,14 @@ jobs:
         run: terraform show -json terraform.plan > plan.json
 
       - name: Generate Infracost Breakdown
-        if: steps.check_action.outputs.action == 'apply'
-        run: |
-          infracost breakdown \
-            --path=plan.json \
-            --format=table \
-            --out-file=infracost-breakdown.txt
+        run: infracost breakdown --path plan.json --out-file infracost-breakdown.txt
+        working-directory: ${{ github.workspace }}/terraform
 
       - name: Upload Infracost Report
-        if: steps.check_action.outputs.action == 'apply'
         uses: actions/upload-artifact@v4
         with:
-          name: infracost-breakdown
-          path: infracost-breakdown.txt
+          name: infracost-report
+          path: ${{ github.workspace }}/terraform/infracost-breakdown.txt
 
       - name: Store plan (for apply only)
         if: steps.check_action.outputs.action == 'apply'

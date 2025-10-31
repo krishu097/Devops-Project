@@ -26,8 +26,10 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 
   service_account_role_arn = var.ebs_csi_driver_role
 
-  resolve_conflicts = "OVERWRITE"
-  tags              = var.tags
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  tags = var.tags
 
   depends_on = [
     aws_eks_node_group.gmk-node-group,
@@ -81,9 +83,13 @@ resource "aws_eks_node_group" "gmk-node-group" {
   disk_size      = each.value.disk_size
   capacity_type  = each.value.capacity_type
 
-  tags = merge(var.tags, {
-    Name = "${each.value.name}-node-group"
-  })
+  tags = merge(
+    var.tags,
+    {
+      Name = "${each.value.name}-node"
+    }
+  )
+
 
 
   depends_on = [

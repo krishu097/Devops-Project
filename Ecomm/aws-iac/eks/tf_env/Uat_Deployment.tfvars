@@ -19,8 +19,8 @@ node_groups = {
     desired_size   = 2
     min_size       = 1
     max_size       = 3
-    instance_types = ["t3.medium"]
-    ami_type       = "AL2023_x86_64_STANDARD"
+    instance_types = ["t4g.medium"]
+    ami_type       = "AL2023_ARM_64_STANDARD"
     disk_size      = 20
     capacity_type  = "ON_DEMAND"
 
