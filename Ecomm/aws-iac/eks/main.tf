@@ -65,5 +65,5 @@ module "rds" {
   subnet_ids             = module.vpc.private_subnets
   rds_monitoring_role_arn = module.iam.rds_monitoring_role_arn
   db_security_group_id    = module.vpc.mysql_security_group_id
-  db_security_group_id    = [module.vpc.mysql_security_group_id]
+
 }
