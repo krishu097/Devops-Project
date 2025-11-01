@@ -1,12 +1,16 @@
 # Primary MySQL RDS instance
+data "aws_secretsmanager_secret_version" "mysql_secret" {
+  secret_id = aws_secretsmanager_secret.mysql_secret.id
+}
+
 resource "aws_db_instance" "primary" {
   identifier              = var.db_instance_identifier
   allocated_storage       = 20
   engine                  = var.db_engine
   engine_version          = var.db_engine_version
   instance_class          = var.db_instance_class
-  username                = var.db_username
-  password                = var.db_password
+  username = jsondecode(data.aws_secretsmanager_secret_version.mysql_secret.secret_string)["username"]
+  password = jsondecode(data.aws_secretsmanager_secret_version.mysql_secret.secret_string)["password"]
   db_name                 = var.db_name
   storage_encrypted       = true
   db_subnet_group_name    = var.subnet_ids
