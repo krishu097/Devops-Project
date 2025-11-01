@@ -52,7 +52,6 @@ module "rds" {
   source = "./modules/rds"
 
   providers = {
-    aws         = aws
     aws.replica = aws.replica
   }
 
