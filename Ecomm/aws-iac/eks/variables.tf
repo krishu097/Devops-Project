@@ -90,7 +90,7 @@ variable "db_engine" {
 variable "db_engine_version" {
   description = "The RDS DB engine version"
   type        = string
-  default     = "8.0.28"
+  default     = "8.0.37"
 }
 
 variable "db_username" {
