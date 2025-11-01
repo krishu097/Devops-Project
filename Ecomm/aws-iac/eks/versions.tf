@@ -14,7 +14,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
-      configuration_aliases = [aws.replica]
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"

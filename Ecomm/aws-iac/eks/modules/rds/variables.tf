@@ -48,3 +48,8 @@ variable "name_prefix" {
   description = "Prefix for resource names"
   type        = string
 }
+
+variable "aws_region_rds_replica" {
+  description = "The AWS region for RDS read replica"
+  type        = string
+}
