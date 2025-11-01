@@ -27,8 +27,7 @@ resource "aws_db_instance" "primary" {
 
 # Cross-region Read Replica
 resource "aws_db_instance" "replica" {
-  provider                = aws
-  region                  = var.aws_region_rds_replica
+  provider                = aws.replica
   identifier              = "${var.db_instance_identifier}-replica"
 
   replicate_source_db     = aws_db_instance.primary.arn

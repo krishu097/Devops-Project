@@ -52,8 +52,10 @@ module "rds" {
   source = "./modules/rds"
 
   providers = {
-    aws.replica = aws.replica   # Replica region
+    aws         = aws
+    aws.replica = aws.replica
   }
+
   name_prefix            = local.name_prefix
   aws_region_rds_replica = var.aws_region_rds_replica
   db_instance_identifier = var.db_instance_identifier
