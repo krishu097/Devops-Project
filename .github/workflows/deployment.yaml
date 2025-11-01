@@ -91,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: infracost-report
-          path: ${{ github.workspace }}/terraform/infracost-breakdown.txt
+          path: ${{ github.workspace }}/Ecomm/aws-iac/eks/infracost-breakdown.txt
 
       - name: Store plan (for apply only)
         if: steps.check_action.outputs.action == 'apply'

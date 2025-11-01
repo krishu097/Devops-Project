@@ -87,6 +87,7 @@ resource "aws_eks_node_group" "gmk-node-group" {
     var.tags,
     {
       Name = "${each.value.name}-node"
+      propagate_at_launch = true
     }
   )
 

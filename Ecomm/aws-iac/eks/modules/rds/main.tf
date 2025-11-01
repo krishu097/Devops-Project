@@ -1,16 +1,12 @@
 # Primary MySQL RDS instance
-data "aws_secretsmanager_secret_version" "mysql_secret" {
-  secret_id = aws_secretsmanager_secret.mysql_secret.id
-}
-
 resource "aws_db_instance" "primary" {
   identifier              = var.db_instance_identifier
   allocated_storage       = 20
   engine                  = var.db_engine
   engine_version          = var.db_engine_version
   instance_class          = var.db_instance_class
-  username = jsondecode(data.aws_secretsmanager_secret_version.mysql_secret.secret_string)["username"]
-  password = jsondecode(data.aws_secretsmanager_secret_version.mysql_secret.secret_string)["password"]
+  username = jsondecode(aws_secretsmanager_secret_version.mysql_secret_value.secret_string)["username"]
+  password = jsondecode(aws_secretsmanager_secret_version.mysql_secret_value.secret_string)["password"]
   db_name                 = var.db_name
   storage_encrypted       = true
   db_subnet_group_name    = var.db_subnet_group_name
@@ -23,6 +19,11 @@ resource "aws_db_instance" "primary" {
   publicly_accessible     = false
   deletion_protection     = false
   multi_az                = false
+
+depends_on = [
+    aws_secretsmanager_secret_version.mysql_secret_value
+  ]
+
 }
 
 # Cross-region Read Replica
