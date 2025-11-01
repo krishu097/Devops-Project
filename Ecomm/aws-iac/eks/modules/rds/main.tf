@@ -36,8 +36,16 @@ resource "aws_db_instance" "replica" {
   instance_class          = var.db_instance_class
 
   storage_encrypted       = true
+  kms_key_id              = aws_kms_key.rds_replica_key.arn
 
   publicly_accessible     = false
   skip_final_snapshot     = true
+  
 }
 
+resource "aws_kms_key" "rds_replica_key" {
+  provider = aws.replica
+  description = "KMS key for RDS cross-region replica encryption"
+  deletion_window_in_days = 10
+  enable_key_rotation = true
+}
