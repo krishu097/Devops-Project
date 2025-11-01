@@ -43,3 +43,8 @@ variable "db_security_group_id" {
   description = "The security group ID for the RDS instance"
   type        = list(string)
 }
+
+variable "name_prefix" {
+  description = "Prefix for resource names"
+  type        = string
+}
