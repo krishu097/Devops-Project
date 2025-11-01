@@ -107,6 +107,12 @@ jobs:
           name: terraform-plan
           path: terraform.plan
 
+      - name: Remove orphaned Kubernetes resources
+        if: steps.check_action.outputs.action == 'destroy'
+        run: |
+          terraform state rm module.eks.kubernetes_service_account.ecr_pull_sa || true
+
+
       - name: Terraform Apply or Destroy
         run: |
           if [ "${{ inputs.Action }}" = "destroy" ]; then
