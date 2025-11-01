@@ -1,6 +1,6 @@
 # Environment Configuration
 aws_region   = "us-east-2"
-aws_region_rds_replica = "us-west-1"
+aws_region_rds_replica = "ap-south-1"
 project_name = "Ecomm"
 environment  = "uat-edfx"
 
