@@ -84,7 +84,19 @@ jobs:
         run: terraform show -json terraform.plan > plan.json
 
       - name: Generate Infracost Breakdown
-        run: infracost breakdown --path plan.json --out-file infracost-breakdown.txt
+        run: |
+         infracost breakdown \
+            --path plan.json \
+            --out-file infracost-breakdown.txt \
+            --format json \
+            --working-dir ${{ github.workspace }}/Ecomm/aws-iac/eks
+
+          # Also print to console
+          infracost breakdown \
+            --path plan.json \
+            --format console \
+            --show-skipped \
+            --working-dir ${{ github.workspace }}/Ecomm/aws-iac/eks
         working-directory: ${{ github.workspace }}/Ecomm/aws-iac/eks
 
       - name: Upload Infracost Report
