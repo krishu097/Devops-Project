@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   plan-and-apply-deployment:
-    name: "Terraform Init, Validate, Plan, Upload State, Apply"
+    name: "Terraform Init, Validate, Plan, Upload State, Apply/Destroy"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     container:
@@ -65,14 +65,20 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan (for apply only)
+      # Separate plan steps for apply vs destroy
+      - name: Terraform Plan for Apply
         if: steps.check_action.outputs.action == 'apply'
         run: |
           export TF_LOG=INFO
           terraform plan -out terraform.plan -input=false -lock=false -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
 
-      #  Infracost Integration
+      - name: Terraform Plan for Destroy
+        if: steps.check_action.outputs.action == 'destroy'
+        run: |
+          export TF_LOG=INFO
+          terraform plan -destroy -out terraform.plan -input=false -lock=false -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
 
+      # Infracost only for apply (optional - remove if you want cost analysis for destroy too)
       - name: Setup Infracost
         if: steps.check_action.outputs.action == 'apply'
         uses: infracost/actions/setup@v3
@@ -84,33 +90,28 @@ jobs:
         run: terraform show -json terraform.plan > plan.json
 
       - name: Generate Infracost Breakdown
+        if: steps.check_action.outputs.action == 'apply'
         run: infracost breakdown --path plan.json --out-file infracost-breakdown.txt
         working-directory: ${{ github.workspace }}/Ecomm/aws-iac/eks
 
       - name: Upload Infracost Report
+        if: steps.check_action.outputs.action == 'apply'
         uses: actions/upload-artifact@v4
         with:
           name: infracost-report
           path: ${{ github.workspace }}/Ecomm/aws-iac/eks/infracost-breakdown.txt
 
-      - name: Store plan (for apply only)
-        if: steps.check_action.outputs.action == 'apply'
+      - name: Store plan
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: terraform.plan
 
-      - name: Terraform Refresh (for destroy only)
-        if: steps.check_action.outputs.action == 'destroy'
-        run: |
-          echo "Refreshing Terraform state..."
-          terraform refresh -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
-
       - name: Terraform Apply or Destroy
         run: |
           if [ "${{ inputs.Action }}" = "destroy" ]; then
             echo "Performing Terraform Destroy..."
-            terraform destroy -auto-approve -var-file ${{ inputs.Terraform_Deployment_Configuration_File }}
+            terraform apply -auto-approve terraform.plan
           else
             echo "Performing Terraform Apply..."
             terraform apply -auto-approve terraform.plan
