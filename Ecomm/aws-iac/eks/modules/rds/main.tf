@@ -13,7 +13,7 @@ resource "aws_db_instance" "primary" {
   password = jsondecode(data.aws_secretsmanager_secret_version.mysql_secret.secret_string)["password"]
   db_name                 = var.db_name
   storage_encrypted       = true
-  db_subnet_group_name    = var.subnet_ids
+  db_subnet_group_name    = var.db_subnet_group_name
   vpc_security_group_ids  = var.db_security_group_id
   monitoring_role_arn     = var.rds_monitoring_role_arn
   monitoring_interval     = 30

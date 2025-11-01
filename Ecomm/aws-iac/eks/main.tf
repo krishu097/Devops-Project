@@ -65,7 +65,7 @@ module "rds" {
   db_engine_version      = var.db_engine_version
   db_instance_class      = var.db_instance_class
   db_engine              = var.db_engine
-  subnet_ids             = module.vpc.private_subnets
+  subnet_ids             = module.vpc.db_subnet_group_name
   rds_monitoring_role_arn = module.iam.rds_monitoring_role_arn
   db_security_group_id    = [module.vpc.mysql_security_group_id]
 

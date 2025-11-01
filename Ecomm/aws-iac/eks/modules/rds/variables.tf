@@ -35,9 +35,9 @@ variable "db_engine" {
   description = "The database engine to use"
   type        = string
 }
-variable "subnet_ids" {
+variable "db_subnet_group_name" {
   description = "The subnet IDs for the RDS instance"
-  type        = list(string)
+  type        = string
 }
 variable "db_security_group_id" {
   description = "The security group ID for the RDS instance"
