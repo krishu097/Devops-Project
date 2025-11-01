@@ -23,5 +23,5 @@ output "ebs_csi_driver_role_arn" {
 
 output "rds_monitoring_role_arn" {
   description = "ARN of the IAM role for RDS Monitoring"
-  value       = aws_iam_role.rds_monitoring_role.arn
+  value       = aws_iam_role.rds_monitoring.arn
 }

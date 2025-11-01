@@ -4,6 +4,12 @@ variable "aws_region" {
 
 }
 
+variable "aws_region_rds_replica" {
+  description = "The AWS region for RDS read replica"
+  type        = string
+
+}
+
 variable "project_name" {
   description = "The name of the project"
   type        = string
