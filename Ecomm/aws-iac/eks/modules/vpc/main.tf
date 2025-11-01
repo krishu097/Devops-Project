@@ -104,7 +104,7 @@ resource "aws_route_table_association" "private" {
 }
 
 ###############################################################
-resource "aws_db_subnet_group" "this" {
+resource "aws_db_subnet_group" "db_subnet" {
   name       = "${var.name_prefix}-db-subnet-group"
   subnet_ids = aws_subnet.private[*].id
   tags = merge(var.tags, {
