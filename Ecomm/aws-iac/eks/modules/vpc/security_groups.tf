@@ -47,3 +47,29 @@ resource "aws_security_group_rule" "nodes_ingress_self" {
   self              = true
   type              = "ingress"
 }
+##################################################################
+
+# Security Group for RDS
+resource "aws_security_group" "mysql" {
+  name        = "${var.name_prefix}-mysql-sg"
+  description = "Security group for MySQL RDS instance"
+  vpc_id      = aws_vpc.gmk-vpc.id
+
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.nodes.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-mysql-sg"
+  })
+}

@@ -2,6 +2,11 @@ provider "aws" {
   region = var.aws_region
 }
 
+provider "aws" {
+  alias  = "replica"
+  region = var.aws_region_rds_replica  # Replica region
+}
+
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -9,7 +14,11 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  # Use the kubernetes provider configured above; nested "kubernetes" block is not supported by this helm provider version.
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    token                  = data.aws_eks_cluster_auth.this.token
+  }
 }
 
 data "aws_eks_cluster_auth" "gmk-cluster" {

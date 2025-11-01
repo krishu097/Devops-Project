@@ -63,3 +63,37 @@ variable "node_groups" {
 }
 
 
+variable "db_instance_identifier" {
+  description = "The RDS DB instance identifier"
+  type        = string
+  default     = "ecomm-rds-instance"
+}
+
+variable "db_instance_class" {
+  description = "The RDS DB instance class"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "db_engine" {
+  description = "The RDS DB engine"
+  type        = string
+  default     = "mysql"
+}
+
+variable "db_engine_version" {
+  description = "The RDS DB engine version"
+  type        = string
+  default     = "8.0.28"
+}
+
+variable "db_username" {
+  description = "The RDS DB master username"
+  type        = string
+  sensitive   = true
+}
+variable "db_password" {
+  description = "The RDS DB master password"
+  type        = string
+  sensitive   = true
+}

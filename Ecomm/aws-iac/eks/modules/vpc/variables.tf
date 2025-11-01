@@ -13,11 +13,6 @@ variable "azs" {
   type        = list(string)
 }
 
-variable "environment" {
-  description = "Environment name"
-  type        = string
-}
-
 variable "project_name" {
   description = "Project name"
   type        = string
@@ -32,7 +27,7 @@ variable "enable_nat_gateway" {
 variable "single_nat_gateway" {
   description = "Use single NAT Gateway for all AZs"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "one_nat_gateway_per_az" {

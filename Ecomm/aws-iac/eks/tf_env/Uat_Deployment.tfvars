@@ -1,5 +1,6 @@
 # Environment Configuration
 aws_region   = "us-east-2"
+aws_region_replica = "us-west-1"
 project_name = "Ecomm"
 environment  = "uat-edfx"
 
@@ -29,3 +30,6 @@ node_groups = {
     }
   }
 }
+
+db_username = "krish"
+db_password = "Krish@1234"

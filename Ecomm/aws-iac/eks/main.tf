@@ -5,7 +5,6 @@ module "vpc" {
   name_prefix            = local.name_prefix
   vpc_cidr               = var.vpc_cidr
   azs                    = local.azs
-  environment            = var.environment
   project_name           = var.project_name
   enable_nat_gateway     = true
   single_nat_gateway     = true
@@ -47,4 +46,24 @@ module "eks" {
   node_groups       = var.node_groups
   ebs-addon-version = var.ebs-addon-version
   tags              = local.common_tags
+}
+
+module "rds" {
+  source = "./modules/rds"
+
+  providers = {
+    aws.replica = aws.replica   # Replica region
+  }
+
+  db_instance_identifier = var.db_instance_identifier
+  db_username            = var.db_username
+  db_password            = var.db_password
+
+  db_engine_version      = var.db_engine_version
+  db_instance_class      = var.db_instance_class
+  db_engine              = var.db_engine
+  subnet_ids             = module.vpc.private_subnets
+  rds_monitoring_role_arn = module.iam.rds_monitoring_role_arn
+  db_security_group_id    = module.vpc.mysql_security_group_id
+  db_security_group_id    = [module.vpc.mysql_security_group_id]
 }
