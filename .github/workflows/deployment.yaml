@@ -85,7 +85,7 @@ jobs:
 
       - name: Generate Infracost Breakdown
         run: infracost breakdown --path plan.json --out-file infracost-breakdown.txt
-        working-directory: ${{ github.workspace }}/terraform
+        working-directory: ${{ github.workspace }}/Ecomm/aws-iac/eks
 
       - name: Upload Infracost Report
         uses: actions/upload-artifact@v4
