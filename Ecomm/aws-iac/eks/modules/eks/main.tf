@@ -47,8 +47,7 @@ resource "kubernetes_service_account" "ebs_csi_sa" {
   }
    depends_on = [
     aws_eks_cluster.gmk-cluster,
-    aws_eks_node_group.gmk-node-group,
-    null_resource.update_kubeconfig
+    aws_eks_node_group.gmk-node-group
   ]
 }
 
@@ -63,8 +62,7 @@ resource "kubernetes_service_account" "ecr_pull_sa" {
   }
    depends_on = [
     aws_eks_cluster.gmk-cluster,
-    aws_eks_node_group.gmk-node-group,
-    null_resource.update_kubeconfig
+    aws_eks_node_group.gmk-node-group
   ]
 }
 
