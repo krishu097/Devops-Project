@@ -18,7 +18,7 @@ data "aws_eks_cluster_auth" "gmk-cluster" {
 
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.gmk-cluster.endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.gmk-cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.gmk-cluster.token
 
   exec {
@@ -36,7 +36,7 @@ provider "kubernetes" {
 provider "helm" {
   kubernetes {
     host                   = data.aws_eks_cluster.gmk-cluster.endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.gmk-cluster.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.gmk-cluster.token
 
     exec {
