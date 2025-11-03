@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "mysql_secret" {
-  name        = "${var.name_prefix}-mysql-credentials"
+  name        = "${var.name_prefix}-mysql-credentials-${replace(timestamp(), ":", "-")}"
   description = "Stores MySQL RDS credentials for ${var.name_prefix} database"
 }
 
