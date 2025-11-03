@@ -45,7 +45,13 @@ resource "kubernetes_service_account" "ebs_csi_sa" {
       "eks.amazonaws.com/role-arn" = var.ebs_csi_driver_role
     }
   }
+   depends_on = [
+    aws_eks_cluster.gmk-cluster,
+    aws_eks_node_group.gmk-node-group,
+    null_resource.update_kubeconfig
+  ]
 }
+
 
 resource "kubernetes_service_account" "ecr_pull_sa" {
   metadata {
@@ -55,6 +61,11 @@ resource "kubernetes_service_account" "ecr_pull_sa" {
       "eks.amazonaws.com/role-arn" = var.eks_ecr_access_role
     }
   }
+   depends_on = [
+    aws_eks_cluster.gmk-cluster,
+    aws_eks_node_group.gmk-node-group,
+    null_resource.update_kubeconfig
+  ]
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
