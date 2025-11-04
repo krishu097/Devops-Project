@@ -33,3 +33,5 @@ node_groups = {
 
 db_username = "krish"
 db_password = "Krish#1234"
+
+db_instance_identifier = "eks-db-uat"
