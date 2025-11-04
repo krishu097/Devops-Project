@@ -43,3 +43,8 @@ variable "tags" {
     owner = "krishna"
   }
 }
+
+variable "db_instance_identifier" {
+  description = "Primary RDS instance identifier"
+  type        = string
+}
