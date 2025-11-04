@@ -14,6 +14,8 @@ module "vpc" {
   single_nat_gateway     = true
   one_nat_gateway_per_az = false
 
+  db_instance_identifier = var.db_instance_identifier
+
   tags = local.common_tags
 }
 
