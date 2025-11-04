@@ -68,4 +68,6 @@ module "rds" {
   rds_monitoring_role_arn = module.iam.rds_monitoring_role_arn
   db_security_group_id    = [module.vpc.mysql_security_group_id]
 
+  replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
+
 }

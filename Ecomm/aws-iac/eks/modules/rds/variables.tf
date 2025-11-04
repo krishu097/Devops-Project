@@ -53,3 +53,8 @@ variable "aws_region_rds_replica" {
   description = "The AWS region for RDS read replica"
   type        = string
 }
+
+variable "replica_db_subnet_group_name" {
+  description = "The subnet group name for the RDS read replica"
+  type        = string
+}

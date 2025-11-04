@@ -32,3 +32,8 @@ output "db_subnet_group_name" {
   description = "Name of the RDS DB subnet group"
   value       = aws_db_subnet_group.db_subnet.name
 }
+
+output "replica_db_subnet_group_name" {
+  description = "Name of the RDS Replica DB subnet group"
+  value       = aws_db_subnet_group.replica_db_subnet_group.name
+}
