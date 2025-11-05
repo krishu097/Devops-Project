@@ -79,30 +79,6 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: test_password
           SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
 
-      - name: Validate SonarQube configuration
-        run: |
-          echo "Validating SonarQube configuration..."
-          echo "Project Key: $SONAR_PROJECT_KEY"
-          echo "Organization: $SONAR_ORGANIZATION"
-          
-          if [ -z "$SONAR_PROJECT_KEY" ]; then
-            echo "❌ SONAR_PROJECT_KEY is not set"
-            exit 1
-          fi
-          if [ -z "$SONAR_ORGANIZATION" ]; then
-            echo "❌ SONAR_ORGANIZATION is not set"
-            exit 1
-          fi
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "❌ SONAR_TOKEN is not set"
-            exit 1
-          fi
-          echo "✅ SonarQube configuration is valid"
-        env:
-          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
-          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: Run SonarQube analysis
         run: |
           mvn sonar:sonar \
