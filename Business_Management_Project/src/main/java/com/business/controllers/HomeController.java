@@ -16,6 +16,12 @@ public class HomeController
 {
 	@Autowired
 	private ProductServices productServices;
+    
+	 @GetMapping("/")
+    public String index() {
+        return "redirect:/home"; // redirects root to /home
+    }
+
 	@GetMapping("/home")
 	public String home()
 	{
