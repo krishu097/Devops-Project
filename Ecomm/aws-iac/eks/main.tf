@@ -52,6 +52,7 @@ module "eks" {
   node_groups       = var.node_groups
   ebs-addon-version = var.ebs-addon-version
   tags              = local.common_tags
+
 }
 
 module "rds" {
@@ -74,6 +75,6 @@ module "rds" {
   rds_monitoring_role_arn = module.iam.rds_monitoring_role_arn
   db_security_group_id    = [module.vpc.mysql_security_group_id]
 
-  replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
+  # replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
 
 }
