@@ -74,3 +74,7 @@ variable "tags" {
 
 }
 
+variable "eks_aws_load_balancer_controller_role" {
+  description = "aws load balancer controller role arn"
+  type        = string
+}

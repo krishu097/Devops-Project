@@ -25,3 +25,8 @@ output "rds_monitoring_role_arn" {
   description = "ARN of the IAM role for RDS Monitoring"
   value       = aws_iam_role.rds_monitoring.arn
 }
+
+output "aws_load_balancer_controller_arn" {
+  description = "ARN of the IAM role for AWS Load Balancer Controller"
+  value       = aws_iam_role.aws_load_balancer_controller.arn
+}

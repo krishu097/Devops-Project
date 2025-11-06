@@ -66,6 +66,25 @@ resource "kubernetes_service_account" "ecr_pull_sa" {
   ]
 }
 
+resource "kubernetes_service_account" "aws_load_balancer_controller" {
+  metadata {
+    name      = "aws-load-balancer-controller"
+    namespace = "kube-system"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = var.eks_aws_load_balancer_controller_role
+    }
+    labels = {
+      "app.kubernetes.io/name" = "aws-load-balancer-controller"
+      "app.kubernetes.io/component" = "controller"
+    }
+  }
+
+  depends_on = [
+    aws_eks_cluster.gmk-cluster,
+    aws_eks_node_group.gmk-node-group
+  ]
+}
+
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 30

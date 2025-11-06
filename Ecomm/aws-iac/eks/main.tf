@@ -46,6 +46,7 @@ module "eks" {
   node_iam_role_arn    = module.iam.node_iam_role_arn
   eks_ecr_access_role  = module.iam.eks_access_ecr_role_arn
   ebs_csi_driver_role  = module.iam.ebs_csi_driver_role_arn
+  eks_aws_load_balancer_controller_role = module.iam.aws_load_balancer_controller_arn
 
 
   # Node Groups
