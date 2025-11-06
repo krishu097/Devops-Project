@@ -246,6 +246,12 @@ resource "aws_iam_policy" "alb_ingress_controller" {
           "elasticloadbalancing:DeregisterTargets",
           "elasticloadbalancing:ModifyListener",
           "elasticloadbalancing:ModifyRule"
+          "acm:ListCertificates",
+          "acm:DescribeCertificate",
+          "shield:GetSubscriptionState",
+          "shield:DescribeProtection",
+          "shield:CreateProtection",
+          "shield:DeleteProtection"
         ]
         Resource = "*"
       }
