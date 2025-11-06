@@ -32,6 +32,7 @@ resource "aws_iam_role_policy_attachment" "aws_cloudwatch_log_groups" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   role       = aws_iam_role.cluster.name
 }
+
 ##############################################################################################
 
 resource "aws_iam_role" "node" {
@@ -72,6 +73,13 @@ resource "aws_iam_role_policy_attachment" "node_AmazonSSMManagedInstanceCore" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.node.name
 }
+
+# REMOVED: Incorrect ALB policy attachment from node role
+# resource "aws_iam_role_policy_attachment" "node_AmazonEKSLoadBalancerController" {
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSLoadBalancerControllerPolicy"
+#   role       = aws_iam_role.node.name
+# }
+
 ########################CUSTOM-POLICIES#####################################################
 data "aws_ecr_repository" "business_mgmt_repo" {
   name = "business-management-app"
@@ -128,6 +136,7 @@ resource "aws_iam_role_policy_attachment" "eks_ecr_attach" {
   role       = aws_iam_role.eks_ecr_access_role.name
   policy_arn = aws_iam_policy.eks_ecr_access_policy.arn
 }
+
 ########################EBS-CSI-DRIVER-POLICY#####################################################
 data "aws_iam_policy_document" "ebs_csi_assume_role" {
   statement {
@@ -157,9 +166,6 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
-
-
-
 data "tls_certificate" "oidc" {
   url = var.oidc_provider_url
 }
@@ -169,6 +175,7 @@ resource "aws_iam_openid_connect_provider" "eks" {
   thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
   url             = var.oidc_provider_url
 }
+
 ###############################################################################################
 # IAM Role for RDS Monitoring
 resource "aws_iam_role" "rds_monitoring" {
@@ -193,4 +200,82 @@ resource "aws_iam_role" "rds_monitoring" {
 resource "aws_iam_role_policy_attachment" "rds_monitoring" {
   role       = aws_iam_role.rds_monitoring.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+}
+
+########################################################################################
+# AWS Load Balancer Controller IAM Policy
+resource "aws_iam_policy" "alb_ingress_controller" {
+  name        = "${var.name_prefix}-ALBIngressControllerPolicy"
+  description = "Policy for AWS Load Balancer Controller"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeAccountAttributes",
+          "ec2:DescribeAddresses",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInternetGateways",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeInstances",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DescribeTags",
+          "elasticloadbalancing:DescribeLoadBalancers",
+          "elasticloadbalancing:DescribeLoadBalancerAttributes",
+          "elasticloadbalancing:DescribeListeners",
+          "elasticloadbalancing:DescribeListenerCertificates",
+          "elasticloadbalancing:DescribeRules",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeTargetGroupAttributes",
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:DescribeTags",
+          "elasticloadbalancing:CreateLoadBalancer",
+          "elasticloadbalancing:CreateTargetGroup",
+          "elasticloadbalancing:CreateListener",
+          "elasticloadbalancing:DeleteLoadBalancer",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "elasticloadbalancing:ModifyTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroupAttributes",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:ModifyListener",
+          "elasticloadbalancing:ModifyRule"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "aws_load_balancer_controller" {
+  name = "${var.name_prefix}-aws-load-balancer-controller"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.eks.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
+  role       = aws_iam_role.aws_load_balancer_controller.name
+  policy_arn = aws_iam_policy.alb_ingress_controller.arn
 }
