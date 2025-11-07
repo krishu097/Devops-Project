@@ -251,7 +251,15 @@ resource "aws_iam_policy" "alb_ingress_controller" {
           "shield:GetSubscriptionState",
           "shield:DescribeProtection",
           "shield:CreateProtection",
-          "shield:DeleteProtection"
+          "shield:DeleteProtection",
+          "ec2:DescribeTags",
+          "ec2:CreateSecurityGroup",     
+          "ec2:CreateTags",               
+          "ec2:DeleteSecurityGroup",     
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",    
+          "ec2:DeleteTags"
+
         ]
         Resource = "*"
       }
