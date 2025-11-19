@@ -103,3 +103,9 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "deploy_secondary" {
+  description = "Deploy secondary region resources for DR"
+  type        = bool
+  default     = false
+}

@@ -55,7 +55,7 @@ resource "aws_db_instance" "replica" {
 }
 
 resource "aws_kms_key" "rds_replica_key" {
-  provider = aws.replica
+  provider    = aws.replica
   description = "KMS key for RDS cross-region replica encryption"
   deletion_window_in_days = 7
   enable_key_rotation = true

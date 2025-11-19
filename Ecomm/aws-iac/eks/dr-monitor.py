@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     """
     
     # Initialize AWS clients
-    primary_region = os.environ.get('PRIMARY_REGION', 'us-east-1')
+    primary_region = os.environ.get('PRIMARY_REGION', 'us-east-2')
     replica_region = os.environ.get('REPLICA_REGION', 'us-west-2')
     
     rds_primary = boto3.client('rds', region_name=primary_region)

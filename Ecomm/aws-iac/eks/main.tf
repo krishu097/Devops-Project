@@ -15,6 +15,7 @@ module "vpc" {
   one_nat_gateway_per_az = false
 
   db_instance_identifier = var.db_instance_identifier
+  deploy_secondary       = var.deploy_secondary
 
   tags = local.common_tags
 }
@@ -52,6 +53,7 @@ module "eks" {
   # Node Groups
   node_groups       = var.node_groups
   ebs-addon-version = var.ebs-addon-version
+  deploy_secondary  = var.deploy_secondary
   tags              = local.common_tags
 
 }
@@ -77,5 +79,6 @@ module "rds" {
   db_security_group_id    = [module.vpc.mysql_security_group_id]
 
   replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
+  deploy_secondary             = var.deploy_secondary
 
 }

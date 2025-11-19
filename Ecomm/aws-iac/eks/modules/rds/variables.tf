@@ -58,3 +58,9 @@ variable "replica_db_subnet_group_name" {
   description = "The subnet group name for the RDS read replica"
   type        = string
 }
+
+variable "deploy_secondary" {
+  description = "Deploy secondary region resources for DR"
+  type        = bool
+  default     = false
+}

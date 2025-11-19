@@ -1,5 +1,5 @@
 aws_region = "us-west-2"
-aws_region_rds_replica = "us-east-1"
+aws_region_rds_replica = "us-east-2"
 
 project_name = "ecomm-dr"
 environment = "dr-secondary"
@@ -34,6 +34,8 @@ db_engine = "mysql"
 db_engine_version = "8.0.37"
 db_username = "admin"
 db_password = "your-secure-password"
+
+deploy_secondary = true
 
 tags = {
   Environment = "dr-secondary"

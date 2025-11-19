@@ -48,3 +48,9 @@ variable "db_instance_identifier" {
   description = "Primary RDS instance identifier"
   type        = string
 }
+
+variable "deploy_secondary" {
+  description = "Deploy secondary region resources for DR"
+  type        = bool
+  default     = false
+}

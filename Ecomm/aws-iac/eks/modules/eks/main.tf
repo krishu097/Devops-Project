@@ -1,4 +1,5 @@
 resource "aws_eks_cluster" "gmk-cluster" {
+  count    = var.deploy_secondary ? 1 : 0
   name     = var.cluster_name
   version  = var.cluster_version
   role_arn = var.cluster_iam_role_arn
@@ -15,12 +16,13 @@ resource "aws_eks_cluster" "gmk-cluster" {
   tags = var.tags
 
   depends_on = [
-    aws_cloudwatch_log_group.eks
+    aws_cloudwatch_log_group.eks[0]
   ]
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
-  cluster_name  = aws_eks_cluster.gmk-cluster.name
+  count         = var.deploy_secondary ? 1 : 0
+  cluster_name  = aws_eks_cluster.gmk-cluster[0].name
   addon_name    = "aws-ebs-csi-driver"
   addon_version = var.ebs-addon-version
 
@@ -38,6 +40,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 }
 
 resource "kubernetes_service_account" "ebs_csi_sa" {
+  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "ebs-csi-controller-sa"
     namespace = "kube-system"
@@ -53,6 +56,7 @@ resource "kubernetes_service_account" "ebs_csi_sa" {
 
 
 resource "kubernetes_service_account" "ecr_pull_sa" {
+  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "ecr-pull-sa"
     namespace = "default"
@@ -67,6 +71,7 @@ resource "kubernetes_service_account" "ecr_pull_sa" {
 }
 
 resource "kubernetes_service_account" "aws_load_balancer_controller" {
+  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
@@ -86,6 +91,7 @@ resource "kubernetes_service_account" "aws_load_balancer_controller" {
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
+  count             = var.deploy_secondary ? 1 : 0
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 30
 
@@ -93,9 +99,9 @@ resource "aws_cloudwatch_log_group" "eks" {
 }
 
 resource "aws_eks_node_group" "gmk-node-group" {
-  for_each = var.node_groups
+  for_each = var.deploy_secondary ? var.node_groups : {}
 
-  cluster_name    = aws_eks_cluster.gmk-cluster.name
+  cluster_name    = aws_eks_cluster.gmk-cluster[0].name
   node_group_name = each.value.name
   node_role_arn   = var.node_iam_role_arn
   subnet_ids      = var.subnet_ids

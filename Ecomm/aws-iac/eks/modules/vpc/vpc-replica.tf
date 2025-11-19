@@ -12,11 +12,11 @@ resource "aws_vpc" "replica_vpc" {
 
 # Replica private subnets (across two AZs)
 resource "aws_subnet" "replica_private_subnets" {
-  provider          = aws.replica
-  for_each          = {
+  for_each = {
     "a" = "10.20.1.0/24"
     "c" = "10.20.2.0/24"
   }
+  provider          = aws.replica
   vpc_id            = aws_vpc.replica_vpc.id
   cidr_block        = each.value
   availability_zone = "us-west-1${each.key}"

@@ -77,7 +77,7 @@ jobs:
     uses: ./.github/workflows/deployment.yaml
     with:
       environment: "dr-secondary"
-      Terraform_Backend_Configuration_File: "tf_env/Backend_DR_Config_Oregon.config"
+      Terraform_Backend_Configuration_File: "tf_env/Backend_Dev_Config_Virginia.config"
       Terraform_Deployment_Configuration_File: "tf_env/DR_Deployment.tfvars"
       WORKING_DIR: "Ecomm/aws-iac/eks"
       Action: "apply"
