@@ -26,27 +26,27 @@ depends_on = [
 
 }
 
-# # Cross-region Read Replica
-# resource "aws_db_instance" "replica" {
-#   provider                = aws.replica
-#   identifier              = "${var.db_instance_identifier}-replica"
+# Cross-region Read Replica
+resource "aws_db_instance" "replica" {
+  provider                = aws.replica
+  identifier              = "${var.db_instance_identifier}-replica"
 
-#   replicate_source_db     = aws_db_instance.primary.arn
+  replicate_source_db     = aws_db_instance.primary.arn
 
-#   instance_class          = var.db_instance_class
+  instance_class          = var.db_instance_class
 
-#   storage_encrypted       = true
-#   kms_key_id              = aws_kms_key.rds_replica_key.arn
-#  db_subnet_group_name     = var.replica_db_subnet_group_name
+  storage_encrypted       = true
+  kms_key_id              = aws_kms_key.rds_replica_key.arn
+  db_subnet_group_name    = var.replica_db_subnet_group_name
 
-#   publicly_accessible     = false
-#   skip_final_snapshot     = true
+  publicly_accessible     = false
+  skip_final_snapshot     = true
   
-# }
+}
 
-# resource "aws_kms_key" "rds_replica_key" {
-#   provider = aws.replica
-#   description = "KMS key for RDS cross-region replica encryption"
-#   deletion_window_in_days = 7
-#   enable_key_rotation = true
-# }
+resource "aws_kms_key" "rds_replica_key" {
+  provider = aws.replica
+  description = "KMS key for RDS cross-region replica encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation = true
+}

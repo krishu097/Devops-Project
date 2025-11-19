@@ -1,0 +1,95 @@
+name: DR Failover Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger_reason:
+        description: 'Reason for DR failover'
+        required: true
+        default: 'Primary region failure detected'
+  repository_dispatch:
+    types: [dr-failover]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-primary-health:
+    name: "Check Primary Region Health"
+    runs-on: ubuntu-latest
+    outputs:
+      primary_healthy: ${{ steps.health_check.outputs.healthy }}
+      replica_count: ${{ steps.replica_check.outputs.count }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Check Primary RDS Health
+        id: health_check
+        run: |
+          PRIMARY_STATUS=$(aws rds describe-db-instances \
+            --db-instance-identifier ecomm-rds-instance \
+            --query 'DBInstances[0].DBInstanceStatus' \
+            --output text 2>/dev/null || echo "failed")
+          
+          if [ "$PRIMARY_STATUS" = "available" ]; then
+            echo "healthy=true" >> $GITHUB_OUTPUT
+          else
+            echo "healthy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Replica Count
+        id: replica_check
+        run: |
+          REPLICA_COUNT=$(aws rds describe-db-instances \
+            --region ${{ vars.AWS_REGION_REPLICA }} \
+            --query 'length(DBInstances[?contains(DBInstanceIdentifier, `replica`)])' \
+            --output text 2>/dev/null || echo "0")
+          
+          echo "count=$REPLICA_COUNT" >> $GITHUB_OUTPUT
+
+  promote-replica:
+    name: "Promote Replica to Primary"
+    runs-on: ubuntu-latest
+    needs: check-primary-health
+    if: needs.check-primary-health.outputs.primary_healthy == 'false' && needs.check-primary-health.outputs.replica_count == '0'
+    steps:
+      - name: Configure AWS credentials for replica region
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION_REPLICA }}
+
+      - name: Promote Read Replica
+        run: |
+          aws rds promote-read-replica \
+            --db-instance-identifier ecomm-rds-instance-replica \
+            --region ${{ vars.AWS_REGION_REPLICA }}
+
+  deploy-secondary-cluster:
+    name: "Deploy Secondary Region EKS Cluster"
+    needs: [check-primary-health, promote-replica]
+    if: needs.check-primary-health.outputs.primary_healthy == 'false' && needs.check-primary-health.outputs.replica_count == '0'
+    uses: ./.github/workflows/deployment.yaml
+    with:
+      environment: "dr-secondary"
+      Terraform_Backend_Configuration_File: "tf_env/Backend_DR_Config_Oregon.config"
+      Terraform_Deployment_Configuration_File: "tf_env/DR_Deployment.tfvars"
+      WORKING_DIR: "Ecomm/aws-iac/eks"
+      Action: "apply"
+    secrets: inherit
+
+  notify-failover:
+    name: "Notify DR Failover Complete"
+    runs-on: ubuntu-latest
+    needs: [deploy-secondary-cluster]
+    if: always()
+    steps:
+      - name: Send notification
+        run: |
+          echo "DR Failover completed. Secondary region cluster is now active."
+          # Add SNS notification or Slack webhook here

@@ -74,12 +74,6 @@ resource "aws_iam_role_policy_attachment" "node_AmazonSSMManagedInstanceCore" {
   role       = aws_iam_role.node.name
 }
 
-# REMOVED: Incorrect ALB policy attachment from node role
-# resource "aws_iam_role_policy_attachment" "node_AmazonEKSLoadBalancerController" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSLoadBalancerControllerPolicy"
-#   role       = aws_iam_role.node.name
-# }
-
 ########################CUSTOM-POLICIES#####################################################
 data "aws_ecr_repository" "business_mgmt_repo" {
   name = "business-management-app"
@@ -285,6 +279,81 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.eks.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(var.oidc_provider_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
+  role       = aws_iam_role.aws_load_balancer_controller.name
+  policy_arn = aws_iam_policy.alb_ingress_controller.arn
+}
+
+########################################################################################
+# DR Cross-Region IAM Policy
+resource "aws_iam_policy" "dr_cross_region_policy" {
+  name        = "${var.name_prefix}-DR-CrossRegion-Policy"
+  description = "Policy for DR cross-region operations"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "rds:DescribeDBInstances",
+          "rds:DescribeDBClusters",
+          "rds:PromoteReadReplica",
+          "rds:ModifyDBInstance",
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:DescribeAlarms",
+          "sns:Publish"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "dr_failover_role" {
+  name = "${var.name_prefix}-dr-failover-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "dr_failover_policy" {
+  role       = aws_iam_role.dr_failover_role.name
+  policy_arn = aws_iam_policy.dr_cross_region_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "dr_failover_lambda_basic" {
+  role       = aws_iam_role.dr_failover_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}ement = [
       {
         Effect = "Allow"
         Principal = {
