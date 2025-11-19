@@ -353,24 +353,4 @@ resource "aws_iam_role_policy_attachment" "dr_failover_policy" {
 resource "aws_iam_role_policy_attachment" "dr_failover_lambda_basic" {
   role       = aws_iam_role.dr_failover_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}ement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = aws_iam_openid_connect_provider.eks.arn
-        }
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          StringEquals = {
-            "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
-          }
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
-  role       = aws_iam_role.aws_load_balancer_controller.name
-  policy_arn = aws_iam_policy.alb_ingress_controller.arn
 }

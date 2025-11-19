@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      version               = ">= 5.0"
+      configuration_aliases = [aws.replica]
+    }
+  }
+}
+
 # Primary MySQL RDS instance
 resource "aws_db_instance" "primary" {
   identifier              = var.db_instance_identifier

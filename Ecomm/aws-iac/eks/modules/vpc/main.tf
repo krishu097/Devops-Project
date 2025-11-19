@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      version               = ">= 5.0"
+      configuration_aliases = [aws.replica]
+    }
+  }
+}
+
 resource "aws_vpc" "gmk-vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
