@@ -110,10 +110,3 @@ variable "deploy_secondary" {
   default     = false
 }
 
-variable "github_token" {
-  description = "GitHub personal access token for DR automation"
-  type        = string
-  sensitive   = true
-  default     = "REMOVEDxcoKWkuSGaUDWyOu1Kk5GJfIBlV3k43AkKFt"
-  
-}
