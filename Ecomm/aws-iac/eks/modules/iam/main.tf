@@ -128,36 +128,40 @@ resource "aws_iam_role" "eks_ecr_access_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "eks_ecr_attach" {
-  role       = aws_iam_role.eks_ecr_access_role.name
+  count      = var.oidc_provider_url != null ? 1 : 0
+  role       = aws_iam_role.eks_ecr_access_role[0].name
   policy_arn = aws_iam_policy.eks_ecr_access_policy.arn
 }
 
 ########################EBS-CSI-DRIVER-POLICY#####################################################
 data "aws_iam_policy_document" "ebs_csi_assume_role" {
+  count = var.oidc_provider_url != null ? 1 : 0
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
 
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+      identifiers = [aws_iam_openid_connect_provider.eks[0].arn]
     }
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+      variable = "${replace(aws_iam_openid_connect_provider.eks[0].url, "https://", "")}:sub"
       values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
     }
   }
 }
 
 resource "aws_iam_role" "ebs_csi_driver" {
+  count              = var.oidc_provider_url != null ? 1 : 0
   name               = "${var.name_prefix}-ebs-csi-driver-role"
-  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "ebs_csi_driver_policy" {
-  role       = aws_iam_role.ebs_csi_driver.name
+  count      = var.oidc_provider_url != null ? 1 : 0
+  role       = aws_iam_role.ebs_csi_driver[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
@@ -277,7 +281,8 @@ resource "aws_iam_policy" "alb_ingress_controller" {
 }
 
 resource "aws_iam_role" "aws_load_balancer_controller" {
-  name = "${var.name_prefix}-aws-load-balancer-controller"
+  count = var.oidc_provider_url != null ? 1 : 0
+  name  = "${var.name_prefix}-aws-load-balancer-controller"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -285,7 +290,7 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.eks.arn
+          Federated = aws_iam_openid_connect_provider.eks[0].arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -299,7 +304,8 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
 }
 
 resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
-  role       = aws_iam_role.aws_load_balancer_controller.name
+  count      = var.oidc_provider_url != null ? 1 : 0
+  role       = aws_iam_role.aws_load_balancer_controller[0].name
   policy_arn = aws_iam_policy.alb_ingress_controller.arn
 }
 

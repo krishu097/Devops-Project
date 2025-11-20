@@ -1,5 +1,5 @@
 output "oidc_provider_id" {
-  value = aws_iam_openid_connect_provider.eks.id
+  value = var.oidc_provider_url != null ? aws_iam_openid_connect_provider.eks[0].id : null
 }
 output "cluster_iam_role_arn" {
   description = "ARN of the EKS cluster IAM role"
@@ -13,12 +13,12 @@ output "node_iam_role_arn" {
 
 output "eks_access_ecr_role_arn" {
   description = "ARN of the IAM role for EKS to access ECR"
-  value       = aws_iam_role.eks_ecr_access_role.arn
+  value       = var.oidc_provider_url != null ? aws_iam_role.eks_ecr_access_role[0].arn : null
 }
 
 output "ebs_csi_driver_role_arn" {
   description = "ARN of the IAM role for EBS CSI Driver"
-  value       = aws_iam_role.ebs_csi_driver.arn
+  value       = var.oidc_provider_url != null ? aws_iam_role.ebs_csi_driver[0].arn : null
 }
 
 output "rds_monitoring_role_arn" {
@@ -28,5 +28,5 @@ output "rds_monitoring_role_arn" {
 
 output "aws_load_balancer_controller_arn" {
   description = "ARN of the IAM role for AWS Load Balancer Controller"
-  value       = aws_iam_role.aws_load_balancer_controller.arn
+  value       = var.oidc_provider_url != null ? aws_iam_role.aws_load_balancer_controller[0].arn : null
 }
