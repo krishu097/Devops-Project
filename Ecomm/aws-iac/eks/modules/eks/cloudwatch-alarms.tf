@@ -2,6 +2,10 @@ resource "aws_sns_topic" "dr_failover" {
   name = "${var.project_name}-${var.environment}-dr-failover-v2"
 }
 
+data "aws_secretsmanager_secret_version" "github_token" {
+  secret_id = "dr-github-token"
+}
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
   output_path = "dr_trigger.zip"
@@ -59,7 +63,7 @@ resource "aws_lambda_function" "dr_trigger" {
 
   environment {
     variables = {
-      GITHUB_TOKEN = var.github_token
+      GITHUB_TOKEN = jsondecode(data.aws_secretsmanager_secret_version.github_token.secret_string)["dr-github-token"]
       GITHUB_REPO  = var.github_repo
     }
   }
@@ -97,6 +101,24 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "logs:PutLogEvents"
         ]
         Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_secrets_policy" {
+  name = "${var.project_name}-${var.environment}-lambda-secrets-policy"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = "arn:aws:secretsmanager:*:*:secret:dr-github-token-*"
       }
     ]
   })
