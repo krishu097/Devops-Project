@@ -31,4 +31,4 @@ node_groups = {
 db_username = "admin"
 db_password = "your-secure-password"
 
-deploy_secondary = true
+deploy_secondary = false

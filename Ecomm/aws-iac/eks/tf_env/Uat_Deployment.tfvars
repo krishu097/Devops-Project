@@ -10,6 +10,8 @@ vpc_cidr = "10.0.0.0/22"
 # EKS Cluster Configuration
 kubernetes_version = "1.33"
 
+deploy_secondary = true
+
 ebs-addon-version = "v1.51.1-eksbuild.1"
 
 
@@ -34,5 +36,5 @@ node_groups = {
 db_username = "krish"
 db_password = "Krish#1234"
 
-deploy_secondary = true
+
 
