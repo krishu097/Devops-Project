@@ -21,7 +21,7 @@ resource "aws_cloudwatch_metric_alarm" "eks_cluster_failed" {
   alarm_actions       = [aws_sns_topic.dr_failover.arn]
 
   dimensions = {
-    ClusterName = aws_eks_cluster.main.name
+    ClusterName = var.deploy_secondary ? aws_eks_cluster.gmk-cluster[0].name : var.cluster_name
   }
 }
 
@@ -38,7 +38,7 @@ resource "aws_cloudwatch_metric_alarm" "application_pods_down" {
   alarm_actions       = [aws_sns_topic.dr_failover.arn]
 
   dimensions = {
-    ClusterName = aws_eks_cluster.main.name
+    ClusterName = var.deploy_secondary ? aws_eks_cluster.gmk-cluster[0].name : var.cluster_name
     Namespace   = "default"
     Service     = "business-management-app"
   }
