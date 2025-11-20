@@ -20,3 +20,9 @@ variable "oidc_provider_url" {
   type        = string
 
 }
+
+variable "deploy_secondary" {
+  description = "Deploy secondary region resources for DR"
+  type        = bool
+  default     = false
+}

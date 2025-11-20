@@ -27,6 +27,7 @@ module "iam" {
 
   name_prefix       = local.name_prefix
   oidc_provider_url = module.eks.cluster_oidc_issuer_url
+  deploy_secondary  = var.deploy_secondary
 
   tags = local.common_tags
 }
