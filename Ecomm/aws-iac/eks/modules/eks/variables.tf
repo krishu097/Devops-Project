@@ -89,3 +89,13 @@ variable "github_repo" {
   type        = string
   default     = "your-username/Devops-Project"
 }
+
+variable "project_name" {
+  description = "Project name"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+}
