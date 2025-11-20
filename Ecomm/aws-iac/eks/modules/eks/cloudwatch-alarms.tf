@@ -124,38 +124,40 @@ resource "aws_lambda_permission" "allow_sns" {
   source_arn    = aws_sns_topic.dr_failover.arn
 }
 
-resource "aws_cloudwatch_metric_alarm" "eks_cluster_failed" {
-  alarm_name          = "${var.project_name}-${var.environment}-eks-cluster-failed"
+# Alarm that triggers when EKS nodes are unhealthy
+resource "aws_cloudwatch_metric_alarm" "eks_nodes_down" {
+  alarm_name          = "${var.project_name}-${var.environment}-eks-nodes-down"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = "2"
-  metric_name         = "cluster_failed_node_count"
+  metric_name         = "cluster_node_count"
   namespace           = "AWS/EKS"
   period              = "300"
   statistic           = "Average"
   threshold           = "1"
-  alarm_description   = "This metric monitors EKS cluster health"
+  alarm_description   = "Triggers DR when EKS nodes are down"
   alarm_actions       = [aws_sns_topic.dr_failover.arn]
+  treat_missing_data  = "breaching"
 
   dimensions = {
-    ClusterName = var.deploy_secondary ? aws_eks_cluster.gmk-cluster[0].name : var.cluster_name
+    ClusterName = var.cluster_name
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "application_pods_down" {
-  alarm_name          = "${var.project_name}-${var.environment}-pods-down"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "pod_ready"
-  namespace           = "ContainerInsights"
-  period              = "300"
+# Manual trigger alarm - set this to ALARM state to test DR
+resource "aws_cloudwatch_metric_alarm" "manual_dr_trigger" {
+  alarm_name          = "${var.project_name}-${var.environment}-manual-dr-trigger"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "60"
   statistic           = "Average"
-  threshold           = "1"
-  alarm_description   = "This metric monitors application pod health"
+  threshold           = "0"
+  alarm_description   = "Manual DR trigger - change threshold to -1 to trigger DR"
   alarm_actions       = [aws_sns_topic.dr_failover.arn]
+  treat_missing_data  = "notBreaching"
 
   dimensions = {
-    ClusterName = var.deploy_secondary ? aws_eks_cluster.gmk-cluster[0].name : var.cluster_name
-    Namespace   = "default"
-    Service     = "business-management-app"
+    InstanceId = "i-nonexistent"
   }
 }
