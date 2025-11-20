@@ -35,8 +35,6 @@ node_groups = {
 db_username = "krish"
 db_password = "Krish#1234"
 
-# github_token = "REMOVED_FOR_SECURITY" # Set via environment variable or command line
-
 # DR Configuration - set to false for primary region monitoring
 deploy_secondary = false
 

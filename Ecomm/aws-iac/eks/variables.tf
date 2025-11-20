@@ -109,4 +109,3 @@ variable "deploy_secondary" {
   type        = bool
   default     = false
 }
-
