@@ -87,7 +87,7 @@ variable "deploy_secondary" {
 variable "github_repo" {
   description = "GitHub repository for DR webhook"
   type        = string
-  default     = "your-username/Devops-Project"
+  default     = "krishu097/Devops-Project"
 }
 
 variable "project_name" {

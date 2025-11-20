@@ -36,5 +36,8 @@ node_groups = {
 db_username = "krish"
 db_password = "Krish#1234"
 
+# GitHub token for DR automation (replace with your actual token)
+github_token = "your_github_personal_access_token_here"
+
 
 
