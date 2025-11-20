@@ -10,7 +10,6 @@ vpc_cidr = "10.0.0.0/22"
 # EKS Cluster Configuration
 kubernetes_version = "1.33"
 
-deploy_secondary = true
 
 ebs-addon-version = "v1.51.1-eksbuild.1"
 
@@ -36,8 +35,10 @@ node_groups = {
 db_username = "krish"
 db_password = "Krish#1234"
 
-# GitHub token for DR automation (replace with your actual token)
-github_token = "your_github_personal_access_token_here"
+github_token = "REMOVEDxcoKWkuSGaUDWyOu1Kk5GJfIBlV3k43AkKFt"
+
+# DR Configuration - set to false for primary region monitoring
+deploy_secondary = false
 
 
 
