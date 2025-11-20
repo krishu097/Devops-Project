@@ -108,6 +108,14 @@ resource "aws_sns_topic_subscription" "lambda_subscription" {
   endpoint  = aws_lambda_function.dr_trigger.arn
 }
 
+# Remove any existing HTTPS subscriptions
+resource "null_resource" "cleanup_https_subscription" {
+  provisioner "local-exec" {
+    command = "aws sns list-subscriptions-by-topic --topic-arn ${aws_sns_topic.dr_failover.arn} --query 'Subscriptions[?Protocol==\`https\`].SubscriptionArn' --output text | xargs -r aws sns unsubscribe --subscription-arn"
+  }
+  depends_on = [aws_sns_topic.dr_failover]
+}
+
 resource "aws_lambda_permission" "allow_sns" {
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
