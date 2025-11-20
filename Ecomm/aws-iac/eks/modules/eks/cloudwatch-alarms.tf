@@ -1,5 +1,5 @@
 resource "aws_sns_topic" "dr_failover" {
-  name = "${var.project_name}-${var.environment}-dr-failover"
+  name = "${var.project_name}-${var.environment}-dr-failover-v2"
 }
 
 data "archive_file" "lambda_zip" {
