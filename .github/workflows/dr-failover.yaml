@@ -8,7 +8,7 @@ on:
         required: true
         default: 'Primary region failure detected'
   repository_dispatch:
-    types: [dr-failover]
+    types: [dr-failover, cloudwatch-alarm]
 
 permissions:
   contents: read
@@ -28,18 +28,27 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Check Primary RDS Health
+      - name: Check Primary EKS Cluster Health
         id: health_check
         run: |
-          PRIMARY_STATUS=$(aws rds describe-db-instances \
-            --db-instance-identifier ecomm-rds-instance \
-            --query 'DBInstances[0].DBInstanceStatus' \
+          # Check if EKS cluster is active
+          CLUSTER_STATUS=$(aws eks describe-cluster \
+            --name Ecomm-uat-edfx-cluster \
+            --query 'cluster.status' \
             --output text 2>/dev/null || echo "failed")
           
-          if [ "$PRIMARY_STATUS" = "available" ]; then
+          # Check if nodes are ready
+          aws eks update-kubeconfig --name Ecomm-uat-edfx-cluster --region ${{ vars.AWS_REGION }} 2>/dev/null || true
+          READY_NODES=$(kubectl get nodes --no-headers 2>/dev/null | grep -c "Ready" || echo "0")
+          
+          # Check if application pods are running
+          RUNNING_PODS=$(kubectl get pods -l app=business-management-app --no-headers 2>/dev/null | grep -c "Running" || echo "0")
+          
+          if [ "$CLUSTER_STATUS" = "ACTIVE" ] && [ "$READY_NODES" -gt "0" ] && [ "$RUNNING_PODS" -gt "0" ]; then
             echo "healthy=true" >> $GITHUB_OUTPUT
           else
             echo "healthy=false" >> $GITHUB_OUTPUT
+            echo "Cluster Status: $CLUSTER_STATUS, Ready Nodes: $READY_NODES, Running Pods: $RUNNING_PODS"
           fi
 
       - name: Check Replica Count
@@ -56,7 +65,7 @@ jobs:
     name: "Promote Replica to Primary"
     runs-on: ubuntu-latest
     needs: check-primary-health
-    if: needs.check-primary-health.outputs.primary_healthy == 'false' && needs.check-primary-health.outputs.replica_count == '0'
+    if: needs.check-primary-health.outputs.primary_healthy == 'false'
     steps:
       - name: Configure AWS credentials for replica region
         uses: aws-actions/configure-aws-credentials@v4
@@ -73,7 +82,7 @@ jobs:
   deploy-secondary-cluster:
     name: "Deploy Secondary Region EKS Cluster"
     needs: [check-primary-health, promote-replica]
-    if: needs.check-primary-health.outputs.primary_healthy == 'false' && needs.check-primary-health.outputs.replica_count == '0'
+    if: needs.check-primary-health.outputs.primary_healthy == 'false'
     uses: ./.github/workflows/deployment.yaml
     with:
       environment: "dr-secondary"
