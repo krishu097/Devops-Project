@@ -109,3 +109,10 @@ variable "deploy_secondary" {
   type        = bool
   default     = false
 }
+
+variable "github_token" {
+  description = "GitHub personal access token for DR automation"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

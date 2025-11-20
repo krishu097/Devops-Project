@@ -57,6 +57,7 @@ module "eks" {
   deploy_secondary  = var.deploy_secondary
   project_name      = var.project_name
   environment       = var.environment
+  github_token      = var.github_token
   tags              = local.common_tags
 
 }
