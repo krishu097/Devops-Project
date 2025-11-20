@@ -111,7 +111,7 @@ resource "aws_sns_topic_subscription" "lambda_subscription" {
 # Remove any existing HTTPS subscriptions
 resource "null_resource" "cleanup_https_subscription" {
   provisioner "local-exec" {
-    command = "aws sns list-subscriptions-by-topic --topic-arn ${aws_sns_topic.dr_failover.arn} --query 'Subscriptions[?Protocol==\`https\`].SubscriptionArn' --output text | xargs -r aws sns unsubscribe --subscription-arn"
+    command = "aws sns list-subscriptions-by-topic --topic-arn ${aws_sns_topic.dr_failover.arn} --query 'Subscriptions[?Protocol==`https`].SubscriptionArn' --output text | xargs -r aws sns unsubscribe --subscription-arn"
   }
   depends_on = [aws_sns_topic.dr_failover]
 }
