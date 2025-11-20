@@ -105,7 +105,8 @@ resource "aws_iam_policy" "eks_ecr_access_policy" {
 }
 
 resource "aws_iam_role" "eks_ecr_access_role" {
-  name = "eks-ecr-access-role"
+  count = var.oidc_provider_url != null ? 1 : 0
+  name  = "eks-ecr-access-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -113,7 +114,7 @@ resource "aws_iam_role" "eks_ecr_access_role" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.eks.arn
+          Federated = aws_iam_openid_connect_provider.eks[0].arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -161,12 +162,14 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver_policy" {
 }
 
 data "tls_certificate" "oidc" {
-  url = var.oidc_provider_url
+  count = var.oidc_provider_url != null ? 1 : 0
+  url   = var.oidc_provider_url
 }
 
 resource "aws_iam_openid_connect_provider" "eks" {
+  count           = var.oidc_provider_url != null ? 1 : 0
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+  thumbprint_list = [data.tls_certificate.oidc[0].certificates[0].sha1_fingerprint]
   url             = var.oidc_provider_url
 }
 

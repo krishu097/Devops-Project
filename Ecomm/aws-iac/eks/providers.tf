@@ -8,46 +8,47 @@ provider "aws" {
 }
 
 data "aws_eks_cluster" "gmk-cluster" {
-  name = module.eks.cluster_id
-
+  count = var.deploy_secondary ? 1 : 0
+  name  = module.eks.cluster_id
 }
 
 data "aws_eks_cluster_auth" "gmk-cluster" {
-  name = module.eks.cluster_id
+  count = var.deploy_secondary ? 1 : 0
+  name  = module.eks.cluster_id
 }
 
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.gmk-cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.gmk-cluster.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.gmk-cluster.token
+  host                   = var.deploy_secondary ? data.aws_eks_cluster.gmk-cluster[0].endpoint : null
+  cluster_ca_certificate = var.deploy_secondary ? base64decode(data.aws_eks_cluster.gmk-cluster[0].certificate_authority[0].data) : null
+  token                  = var.deploy_secondary ? data.aws_eks_cluster_auth.gmk-cluster[0].token : null
 
   exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args = [
+      args = var.deploy_secondary ? [
         "eks",
         "get-token",
         "--cluster-name",
-        data.aws_eks_cluster.gmk-cluster.name
-      ]
+        data.aws_eks_cluster.gmk-cluster[0].name
+      ] : []
     }
 }
 
 provider "helm" {
   kubernetes {
-    host                   = data.aws_eks_cluster.gmk-cluster.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.gmk-cluster.certificate_authority[0].data)
-    token                  = data.aws_eks_cluster_auth.gmk-cluster.token
+    host                   = var.deploy_secondary ? data.aws_eks_cluster.gmk-cluster[0].endpoint : null
+    cluster_ca_certificate = var.deploy_secondary ? base64decode(data.aws_eks_cluster.gmk-cluster[0].certificate_authority[0].data) : null
+    token                  = var.deploy_secondary ? data.aws_eks_cluster_auth.gmk-cluster[0].token : null
 
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args = [
+      args = var.deploy_secondary ? [
         "eks",
         "get-token",
         "--cluster-name",
-        data.aws_eks_cluster.gmk-cluster.name
-      ]
+        data.aws_eks_cluster.gmk-cluster[0].name
+      ] : []
     }
   }
 }
