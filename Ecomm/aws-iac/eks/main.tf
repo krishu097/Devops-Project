@@ -55,6 +55,8 @@ module "eks" {
   node_groups       = var.node_groups
   ebs-addon-version = var.ebs-addon-version
   deploy_secondary  = var.deploy_secondary
+  project_name      = var.project_name
+  environment       = var.environment
   tags              = local.common_tags
 
 }
