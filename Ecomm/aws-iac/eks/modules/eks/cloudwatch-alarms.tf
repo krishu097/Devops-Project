@@ -2,12 +2,60 @@ resource "aws_sns_topic" "dr_failover" {
   name = "${var.project_name}-${var.environment}-dr-failover"
 }
 
+data "archive_file" "lambda_zip" {
+  type        = "zip"
+  output_path = "dr_trigger.zip"
+  source {
+    content = <<EOF
+import json
+import urllib3
+import os
+
+def handler(event, context):
+    github_token = os.environ['GITHUB_TOKEN']
+    github_repo = os.environ['GITHUB_REPO']
+    
+    if not github_token:
+        return {'statusCode': 200, 'body': 'No GitHub token configured'}
+    
+    http = urllib3.PoolManager()
+    
+    url = f"https://api.github.com/repos/{github_repo}/dispatches"
+    
+    headers = {
+        'Authorization': f'token {github_token}',
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+    }
+    
+    data = {
+        'event_type': 'cloudwatch-alarm',
+        'client_payload': {
+            'alarm': event['Records'][0]['Sns']['Subject'],
+            'message': event['Records'][0]['Sns']['Message']
+        }
+    }
+    
+    response = http.request('POST', url, 
+                          body=json.dumps(data).encode('utf-8'),
+                          headers=headers)
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps('DR pipeline triggered successfully')
+    }
+EOF
+    filename = "index.py"
+  }
+}
+
 resource "aws_lambda_function" "dr_trigger" {
-  filename         = "dr_trigger.zip"
+  filename         = data.archive_file.lambda_zip.output_path
   function_name    = "${var.project_name}-${var.environment}-dr-trigger"
   role            = aws_iam_role.lambda_role.arn
   handler         = "index.handler"
   runtime         = "python3.9"
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   environment {
     variables = {
