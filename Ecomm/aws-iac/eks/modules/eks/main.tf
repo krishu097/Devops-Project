@@ -32,12 +32,12 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   tags = var.tags
 
   depends_on = [
-    aws_eks_node_group.gmk-node-group,
-    kubernetes_service_account.ebs_csi_sa
+    aws_eks_node_group.gmk-node-group
   ]
 }
 
 resource "kubernetes_service_account" "ebs_csi_sa" {
+  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "ebs-csi-controller-sa"
     namespace = "kube-system"
@@ -53,6 +53,7 @@ resource "kubernetes_service_account" "ebs_csi_sa" {
 
 
 resource "kubernetes_service_account" "ecr_pull_sa" {
+  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "ecr-pull-sa"
     namespace = "default"
@@ -67,6 +68,7 @@ resource "kubernetes_service_account" "ecr_pull_sa" {
 }
 
 resource "kubernetes_service_account" "aws_load_balancer_controller" {
+  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"

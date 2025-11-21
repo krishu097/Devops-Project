@@ -38,9 +38,8 @@ db_password = "Krish#1234"
 # DR Configuration - set to false for primary region monitoring
 deploy_secondary = false
 
-# GitHub Configuration for Auto-Trigger
-github_token = "your-github-token-here"
-github_repo  = "your-username/Devops-Project"
+# GitHub repository for DR automation
+github_repo = "krishu097/Devops-Project"
 
 
 

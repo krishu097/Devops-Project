@@ -110,12 +110,6 @@ variable "deploy_secondary" {
   default     = false
 }
 
-variable "github_token" {
-  description = "GitHub token for DR auto-trigger"
-  type        = string
-  sensitive   = true
-}
-
 variable "github_repo" {
   description = "GitHub repository for DR pipeline (owner/repo)"
   type        = string
