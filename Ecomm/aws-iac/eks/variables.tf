@@ -114,3 +114,9 @@ variable "github_repo" {
   description = "GitHub repository for DR pipeline (owner/repo)"
   type        = string
 }
+
+variable "create_k8s_secret" {
+  description = "Create Kubernetes secret for RDS connection"
+  type        = bool
+  default     = false
+}
