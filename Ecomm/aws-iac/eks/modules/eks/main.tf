@@ -20,6 +20,8 @@ resource "aws_eks_cluster" "gmk-cluster" {
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
+  count = var.deploy_secondary ? 1 : 0
+  
   cluster_name  = aws_eks_cluster.gmk-cluster.name
   addon_name    = "aws-ebs-csi-driver"
   addon_version = var.ebs-addon-version
@@ -30,6 +32,12 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   resolve_conflicts_on_update = "OVERWRITE"
 
   tags = var.tags
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "30m"
+  }
 
   depends_on = [
     aws_eks_node_group.gmk-node-group
@@ -88,6 +96,8 @@ resource "kubernetes_service_account" "aws_load_balancer_controller" {
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
+  count = var.deploy_secondary ? 1 : 0
+  
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 30
 
