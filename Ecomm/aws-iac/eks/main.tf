@@ -83,7 +83,7 @@ module "rds" {
 
   replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
   deploy_secondary             = var.deploy_secondary
-  create_k8s_secret           = true   # Create RDS secret automatically
+  create_k8s_secret           = false  # Use shell script for primary region
 
   depends_on = [module.eks]
 }
