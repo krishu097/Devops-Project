@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "my-elasticsearch.fullname" . }}
+  namespace: monitoring
+  labels:
+    app: {{ include "my-elasticsearch.name" . }}
+spec:
+  serviceName: {{ include "my-elasticsearch.fullname" . }}
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "my-elasticsearch.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "my-elasticsearch.name" . }}
+    spec:
+          containers:
+          - name: elasticsearch
+            image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+            resources:
+             {{- toYaml .Values.resources | nindent 12 }}
+            env:
+              - name: discovery.type
+                value: single-node
+            volumeMounts:
+              - name: elasticsearch-storage
+                mountPath: /usr/share/elasticsearch/data
+
+    volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-storage
+        spec:
+         {{- toYaml .Values.volumeClaimTemplate.spec | nindent 8 }}

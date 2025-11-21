@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-management-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: business-management-app
+  template:
+    metadata:
+      labels:
+        app: business-management-app
+    spec:
+      serviceAccountName: ecr-pull-sa
+
+      containers:
+      - name: business-management-app
+        image: 361509912577.dkr.ecr.us-east-2.amazonaws.com/business-management-app:v1
+        ports:
+        - containerPort: 2330
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "test"
+
+        # RDS Secret-Based Configuration
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: rds-connection
+              key: jdbc_url
+
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: rds-connection
+              key: username
+
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rds-connection
+              key: password
+
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: "com.mysql.cj.jdbc.Driver"
+
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
+     
+        - name: SPRING_JPA_DATABASE_PLATFORM
+          value: "org.hibernate.dialect.MySQL8Dialect"
+
+        - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+          value: "org.hibernate.dialect.MySQL8Dialect"
+
+        - name: SPRING_JPA_SHOW_SQL
+          value: "true"
+
+                
+        - name: SERVER_PORT
+          value: "2330"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1024Mi"
+            cpu: "500m"
+
+        livenessProbe:
+          tcpSocket:
+            port: 2330
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          tcpSocket:
+            port: 2330
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 5

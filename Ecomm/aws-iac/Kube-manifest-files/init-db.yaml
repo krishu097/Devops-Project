@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-database-v2
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: mysql-client
+        image: mysql:8.0
+        command:
+        - /bin/bash
+        - -c
+        - |
+          echo "Original DB_HOST: $DB_HOST"
+          DB_HOST_CLEAN=$(echo $DB_HOST | cut -d: -f1)
+          echo "Cleaned DB_HOST: $DB_HOST_CLEAN"
+          mysql -h $DB_HOST_CLEAN -P 3306 -u $DB_USER -p$DB_PASSWORD -e "CREATE DATABASE IF NOT EXISTS businessproject;"
+          echo "Database initialization completed"
+        env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: rds-connection
+              key: endpoint
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: rds-connection
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rds-connection
+              key: password
