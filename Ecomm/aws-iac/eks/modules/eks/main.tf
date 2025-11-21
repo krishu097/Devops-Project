@@ -46,9 +46,10 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 
 # CloudWatch Observability add-on for container insights
 resource "aws_eks_addon" "cloudwatch_observability" {
+  count = var.deploy_secondary ? 0 : 1
+  
   cluster_name  = aws_eks_cluster.gmk-cluster.name
   addon_name    = "amazon-cloudwatch-observability"
-  addon_version = "v1.7.0-eksbuild.1"
 
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
