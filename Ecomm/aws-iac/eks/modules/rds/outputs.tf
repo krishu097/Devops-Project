@@ -13,3 +13,13 @@ output "mysql_secret_arn" {
   description = "ARN of the MySQL credentials secret"
   value       = aws_secretsmanager_secret.mysql_secret.arn
 }
+
+output "mysql_replica_endpoint" {
+  description = "MySQL read replica endpoint for DR"
+  value       = aws_db_instance.replica.endpoint
+}
+
+output "mysql_replica_region" {
+  description = "MySQL read replica region"
+  value       = var.aws_region_rds_replica
+}

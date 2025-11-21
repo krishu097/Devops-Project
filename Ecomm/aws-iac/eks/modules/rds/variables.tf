@@ -64,3 +64,9 @@ variable "deploy_secondary" {
   type        = bool
   default     = false
 }
+
+variable "create_k8s_secret" {
+  description = "Create Kubernetes secret for RDS connection"
+  type        = bool
+  default     = false
+}

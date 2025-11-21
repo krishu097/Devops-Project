@@ -83,5 +83,9 @@ module "rds" {
 
   replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
   deploy_secondary             = var.deploy_secondary
+  create_k8s_secret           = false  # Create after EKS is ready
 
+  depends_on = [module.eks]
 }
+
+

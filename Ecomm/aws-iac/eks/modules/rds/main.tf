@@ -36,7 +36,7 @@ depends_on = [
 
 }
 
-# Cross-region Read Replica
+# Cross-region Read Replica (always created for DR)
 resource "aws_db_instance" "replica" {
   provider                = aws.replica
   identifier              = "${var.db_instance_identifier}-replica"
@@ -52,6 +52,10 @@ resource "aws_db_instance" "replica" {
   publicly_accessible     = false
   skip_final_snapshot     = true
   
+  tags = {
+    Name = "${var.db_instance_identifier}-replica"
+    Purpose = "DR-ReadReplica"
+  }
 }
 
 resource "aws_kms_key" "rds_replica_key" {
@@ -59,4 +63,9 @@ resource "aws_kms_key" "rds_replica_key" {
   description = "KMS key for RDS cross-region replica encryption"
   deletion_window_in_days = 7
   enable_key_rotation = true
+  
+  tags = {
+    Name = "rds-replica-key"
+    Purpose = "DR-Encryption"
+  }
 }

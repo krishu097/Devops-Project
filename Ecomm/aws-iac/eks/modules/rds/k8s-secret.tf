@@ -1,4 +1,6 @@
 resource "kubernetes_secret" "rds_connection" {
+  count = var.create_k8s_secret ? 1 : 0
+  
   metadata {
     name      = "rds-connection"
     namespace = "default"
