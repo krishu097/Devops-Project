@@ -180,7 +180,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_connection_failure" {
   treat_missing_data  = "breaching"
 
   dimensions = {
-    DBInstanceIdentifier = "ecomm-uat-edfx-mysql"
+    DBInstanceIdentifier = "ecomm-rds-instance"
   }
 }
 
@@ -199,51 +199,9 @@ resource "aws_cloudwatch_metric_alarm" "app_health_failure" {
   treat_missing_data  = "breaching"
 }
 
-# Application pod failure alarm (uses CloudWatch Observability add-on)
-resource "aws_cloudwatch_metric_alarm" "app_pod_failure" {
-  alarm_name          = "${var.project_name}-${var.environment}-app-pod-failure"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "pod_ready"
-  namespace           = "ContainerInsights"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "1"
-  alarm_description   = "Triggers DR when application pods are not ready"
-  alarm_actions       = [aws_sns_topic.dr_failover.arn]
-  treat_missing_data  = "breaching"
-
-  dimensions = {
-    ClusterName = var.cluster_name
-    Namespace   = "default"
-    Service     = "business-management-app"
-  }
-}
-
-# Application pods count zero alarm
+# Primary pod monitoring alarm - triggers when pods go to zero
 resource "aws_cloudwatch_metric_alarm" "app_pods_zero" {
   alarm_name          = "${var.project_name}-${var.environment}-app-pods-zero"
-  comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "pod_number_of_containers"
-  namespace           = "ContainerInsights"
-  period              = "300"
-  statistic           = "Sum"
-  threshold           = "0"
-  alarm_description   = "Triggers DR when application pod count reaches zero"
-  alarm_actions       = [aws_sns_topic.dr_failover.arn]
-  treat_missing_data  = "breaching"
-
-  dimensions = {
-    ClusterName = var.cluster_name
-    Namespace   = "default"
-    Service     = "business-management-app"
-  }
-}
-
-# Running pods count alarm (alternative metric)
-resource "aws_cloudwatch_metric_alarm" "running_pods_zero" {
-  alarm_name          = "${var.project_name}-${var.environment}-running-pods-zero"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "pod_running"
@@ -251,7 +209,7 @@ resource "aws_cloudwatch_metric_alarm" "running_pods_zero" {
   period              = "300"
   statistic           = "Sum"
   threshold           = "0"
-  alarm_description   = "Triggers DR when no application pods are running"
+  alarm_description   = "Triggers DR when application pod count reaches zero"
   alarm_actions       = [aws_sns_topic.dr_failover.arn]
   treat_missing_data  = "breaching"
 
