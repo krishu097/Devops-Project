@@ -12,7 +12,7 @@ spec:
       labels:
         app: business-management-app
     spec:
-      serviceAccountName: ecr-pull-sa
+      # serviceAccountName: ecr-pull-sa
 
       containers:
       - name: business-management-app
