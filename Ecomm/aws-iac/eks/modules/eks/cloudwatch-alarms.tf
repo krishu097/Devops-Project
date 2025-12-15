@@ -180,7 +180,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_connection_failure" {
   treat_missing_data  = "breaching"
 
   dimensions = {
-    DBInstanceIdentifier = "ecomm-rds-instance"
+    DBInstanceIdentifier = "ecomm-uat-edfx-mysql"
   }
 }
 

@@ -1,104 +1,128 @@
-name: DR Failover Pipeline
+name: DR Failover Workflow
 
 on:
+  repository_dispatch:
+    types: [cloudwatch-alarm]
   workflow_dispatch:
     inputs:
-      trigger_reason:
-        description: 'Reason for DR failover'
-        required: true
-        default: 'Primary region failure detected'
-  repository_dispatch:
-    types: [dr-failover, cloudwatch-alarm]
-
-permissions:
-  contents: read
-  issues: write
+      force_failover:
+        description: 'Force DR failover'
+        required: false
+        default: 'false'
 
 jobs:
-  check-primary-health:
-    name: "Check Primary Region Health"
+  dr-failover:
     runs-on: ubuntu-latest
-    outputs:
-      primary_healthy: ${{ steps.health_check.outputs.healthy }}
-      replica_count: ${{ steps.replica_check.outputs.count }}
+    
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Check Primary EKS Cluster Health
-        id: health_check
-        run: |
-          # Check if EKS cluster is active
-          CLUSTER_STATUS=$(aws eks describe-cluster \
-            --name Ecomm-uat-edfx-cluster \
-            --query 'cluster.status' \
-            --output text 2>/dev/null || echo "failed")
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Check Primary Infrastructure Health
+      id: primary-health
+      run: |
+        cd Ecomm/aws-iac/eks
+        
+        # Check EKS cluster
+        CLUSTER_STATUS=$(aws eks describe-cluster --name Ecomm-uat-edfx-cluster --region us-east-2 --query 'cluster.status' --output text 2>/dev/null || echo "NOT_FOUND")
+        
+        # Check RDS instance
+        RDS_STATUS=$(aws rds describe-db-instances --db-instance-identifier ecomm-uat-edfx-mysql --region us-east-2 --query 'DBInstances[0].DBInstanceStatus' --output text 2>/dev/null || echo "NOT_FOUND")
+        
+        if [ "$CLUSTER_STATUS" != "ACTIVE" ] || [ "$RDS_STATUS" != "available" ]; then
+          echo "primary_healthy=false" >> $GITHUB_OUTPUT
+          echo "Primary infrastructure unhealthy - EKS: $CLUSTER_STATUS, RDS: $RDS_STATUS"
+        else
+          echo "primary_healthy=true" >> $GITHUB_OUTPUT
+          echo "Primary infrastructure healthy"
+        fi
+
+    - name: Promote RDS Read Replica
+      if: steps.primary-health.outputs.primary_healthy == 'false' || github.event.inputs.force_failover == 'true'
+      run: |
+        echo "Promoting RDS read replica to primary..."
+        
+        # Check if replica exists
+        REPLICA_STATUS=$(aws rds describe-db-instances --db-instance-identifier ecomm-uat-edfx-mysql-replica --region us-west-1 --query 'DBInstances[0].DBInstanceStatus' --output text 2>/dev/null || echo "NOT_FOUND")
+        
+        if [ "$REPLICA_STATUS" = "available" ]; then
+          # Promote read replica
+          aws rds promote-read-replica --db-instance-identifier ecomm-uat-edfx-mysql-replica --region us-west-1
           
-          # Check if nodes are ready
-          aws eks update-kubeconfig --name Ecomm-uat-edfx-cluster --region ${{ vars.AWS_REGION }} 2>/dev/null || true
-          READY_NODES=$(kubectl get nodes --no-headers 2>/dev/null | grep -c "Ready" || echo "0")
+          # Wait for promotion to complete
+          echo "Waiting for replica promotion..."
+          aws rds wait db-instance-available --db-instance-identifier ecomm-uat-edfx-mysql-replica --region us-west-1
           
-          # Check if application pods are running
-          RUNNING_PODS=$(kubectl get pods -l app=business-management-app --no-headers 2>/dev/null | grep -c "Running" || echo "0")
-          
-          if [ "$CLUSTER_STATUS" = "ACTIVE" ] && [ "$READY_NODES" -gt "0" ] && [ "$RUNNING_PODS" -gt "0" ]; then
-            echo "healthy=true" >> $GITHUB_OUTPUT
-          else
-            echo "healthy=false" >> $GITHUB_OUTPUT
-            echo "Cluster Status: $CLUSTER_STATUS, Ready Nodes: $READY_NODES, Running Pods: $RUNNING_PODS"
-          fi
+          echo "RDS replica promoted successfully"
+        else
+          echo "No healthy replica found for promotion"
+        fi
 
-      - name: Check Replica Count
-        id: replica_check
-        run: |
-          REPLICA_COUNT=$(aws rds describe-db-instances \
-            --region ${{ vars.AWS_REGION_REPLICA }} \
-            --query 'length(DBInstances[?contains(DBInstanceIdentifier, `replica`)])' \
-            --output text 2>/dev/null || echo "0")
-          
-          echo "count=$REPLICA_COUNT" >> $GITHUB_OUTPUT
+    - name: Deploy DR Infrastructure
+      if: steps.primary-health.outputs.primary_healthy == 'false' || github.event.inputs.force_failover == 'true'
+      run: |
+        cd Ecomm/aws-iac/eks
+        
+        echo "Deploying DR infrastructure..."
+        
+        # Initialize Terraform
+        terraform init
+        
+        # Deploy secondary region using DR tfvars
+        terraform apply -var-file="tf_env/DR_Deployment.tfvars" -auto-approve
+        
+        echo "DR infrastructure deployed"
 
-  promote-replica:
-    name: "Promote Replica to Primary"
-    runs-on: ubuntu-latest
-    needs: check-primary-health
-    if: needs.check-primary-health.outputs.primary_healthy == 'false'
-    steps:
-      - name: Configure AWS credentials for replica region
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION_REPLICA }}
+    - name: Create RDS Secret in DR Cluster
+      if: steps.primary-health.outputs.primary_healthy == 'false' || github.event.inputs.force_failover == 'true'
+      run: |
+        # Get promoted RDS endpoint
+        RDS_ENDPOINT=$(aws rds describe-db-instances --db-instance-identifier ecomm-uat-edfx-mysql-replica --region us-west-1 --query 'DBInstances[0].Endpoint.Address' --output text)
+        
+        # Update kubeconfig for DR cluster
+        aws eks update-kubeconfig --region us-west-1 --name Ecomm-uat-edfx-cluster
+        
+        # Create RDS connection secret
+        kubectl create secret generic rds-connection \
+          --from-literal=endpoint="$RDS_ENDPOINT" \
+          --from-literal=username="krish" \
+          --from-literal=password="Krish#1234" \
+          --from-literal=database="businessproject" \
+          --from-literal=jdbc_url="jdbc:mysql://$RDS_ENDPOINT/businessproject?useSSL=true&serverTimezone=UTC" \
+          --dry-run=client -o yaml | kubectl apply -f -
+        
+        echo "RDS secret created in DR cluster"
 
-      - name: Promote Read Replica
-        run: |
-          aws rds promote-read-replica \
-            --db-instance-identifier ecomm-rds-instance-replica \
-            --region ${{ vars.AWS_REGION_REPLICA }}
+    - name: Deploy Application to DR Cluster
+      if: steps.primary-health.outputs.primary_healthy == 'false' || github.event.inputs.force_failover == 'true'
+      run: |
+        # Deploy application
+        kubectl apply -f Kube-manifest-files/business-app-deployment.yaml
+        
+        # Wait for deployment
+        kubectl rollout status deployment/business-management-app --timeout=300s
+        
+        echo "Application deployed to DR cluster"
 
-  deploy-secondary-cluster:
-    name: "Deploy Secondary Region EKS Cluster"
-    needs: [check-primary-health, promote-replica]
-    if: needs.check-primary-health.outputs.primary_healthy == 'false'
-    uses: ./.github/workflows/deployment.yaml
-    with:
-      environment: "dr-secondary"
-      Terraform_Backend_Configuration_File: "tf_env/Backend_Dev_Config_Virginia.config"
-      Terraform_Deployment_Configuration_File: "tf_env/DR_Deployment.tfvars"
-      WORKING_DIR: "Ecomm/aws-iac/eks"
-      Action: "apply"
-    secrets: inherit
-
-  notify-failover:
-    name: "Notify DR Failover Complete"
-    runs-on: ubuntu-latest
-    needs: [deploy-secondary-cluster]
-    if: always()
-    steps:
-      - name: Send notification
-        run: |
-          echo "DR Failover completed. Secondary region cluster is now active."
-          # Add SNS notification or Slack webhook here
+    - name: Verify DR Deployment
+      if: steps.primary-health.outputs.primary_healthy == 'false' || github.event.inputs.force_failover == 'true'
+      run: |
+        # Verify pods are running
+        kubectl get pods -l app=business-management-app
+        
+        # Verify service
+        kubectl get svc business-management-service
+        
+        echo "DR deployment verification completed"

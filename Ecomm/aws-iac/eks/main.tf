@@ -57,6 +57,7 @@ module "eks" {
   deploy_secondary  = var.deploy_secondary
   project_name      = var.project_name
   environment       = var.environment
+  github_repo       = var.github_repo
   tags              = local.common_tags
 
 }
@@ -83,7 +84,6 @@ module "rds" {
 
   replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
   deploy_secondary             = var.deploy_secondary
-  create_k8s_secret           = var.create_k8s_secret
 
   depends_on = [module.eks]
 }

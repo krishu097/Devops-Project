@@ -1,41 +1,43 @@
-aws_region = "us-west-2"
+# DR Environment Configuration
+aws_region = "us-west-1"
 aws_region_rds_replica = "us-east-2"
+project_name = "Ecomm"
+environment = "dr-edfx"
 
-project_name = "ecomm-dr"
-environment = "dr-secondary"
+# VPC Configuration
+vpc_cidr = "10.1.0.0/22"
 
-vpc_cidr = "10.20.0.0/16"
+# EKS Cluster Configuration
+kubernetes_version = "1.33"
+ebs-addon-version = "v1.51.1-eksbuild.1"
 
-kubernetes_version = "1.28"
-ebs-addon-version = "v1.25.0-eksbuild.1"
-
-cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
-
+# Node Groups Configuration
 node_groups = {
-  dr_nodes = {
-    name           = "dr-worker-nodes"
+  dr-node-group = {
+    name           = "ecomm-dr-node-group"
     desired_size   = 2
     min_size       = 1
-    max_size       = 4
+    max_size       = 3
     instance_types = ["t3.medium"]
-    ami_type       = "AL2_x86_64"
+    ami_type       = "AL2023_x86_64_STANDARD"
     disk_size      = 20
     capacity_type  = "ON_DEMAND"
+
     labels = {
-      Environment = "dr-secondary"
-      NodeGroup   = "dr-workers"
+      role = "worker"
     }
   }
 }
 
-db_instance_identifier = "ecomm-rds-instance"
-db_instance_class = "db.t3.micro"
-db_engine = "mysql"
-db_engine_version = "8.0.37"
-db_username = "admin"
-db_password = "your-secure-password"
+db_username = "krish"
+db_password = "Krish#1234"
 
+# DR Configuration - deploy secondary resources
 deploy_secondary = true
+
+# GitHub Configuration for Auto-Trigger
+github_token = "your-github-token-here"
+github_repo  = "your-username/Devops-Project"
 
 tags = {
   Environment = "dr-secondary"
