@@ -20,8 +20,6 @@ resource "aws_eks_cluster" "gmk-cluster" {
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
-  count = var.deploy_secondary ? 1 : 0
-  
   cluster_name  = aws_eks_cluster.gmk-cluster.name
   addon_name    = "aws-ebs-csi-driver"
   addon_version = var.ebs-addon-version
@@ -69,7 +67,6 @@ resource "aws_eks_addon" "cloudwatch_observability" {
 }
 
 resource "kubernetes_service_account" "ebs_csi_sa" {
-  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "ebs-csi-controller-sa"
     namespace = "kube-system"
@@ -85,7 +82,6 @@ resource "kubernetes_service_account" "ebs_csi_sa" {
 
 
 resource "kubernetes_service_account" "ecr_pull_sa" {
-  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "ecr-pull-sa"
     namespace = "default"
@@ -100,7 +96,6 @@ resource "kubernetes_service_account" "ecr_pull_sa" {
 }
 
 resource "kubernetes_service_account" "aws_load_balancer_controller" {
-  count = var.deploy_secondary ? 1 : 0
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
@@ -120,8 +115,6 @@ resource "kubernetes_service_account" "aws_load_balancer_controller" {
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
-  count = var.deploy_secondary ? 1 : 0
-  
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 30
 
