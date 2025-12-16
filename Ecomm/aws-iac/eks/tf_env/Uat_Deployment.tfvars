@@ -11,7 +11,7 @@ vpc_cidr = "10.0.0.0/22"
 kubernetes_version = "1.33"
 
 
-ebs-addon-version = "v1.51.1-eksbuild.1"
+ebs-addon-version = "v1.53.0-eksbuild.1"
 
 
 # Node Groups Configuration

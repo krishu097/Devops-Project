@@ -20,24 +20,15 @@ resource "aws_eks_cluster" "gmk-cluster" {
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
-  count = 1
-  
-  cluster_name  = aws_eks_cluster.gmk-cluster.name
-  addon_name    = "aws-ebs-csi-driver"
-  addon_version = var.ebs-addon-version
-
+  cluster_name             = aws_eks_cluster.gmk-cluster.name
+  addon_name               = "aws-ebs-csi-driver"
+  addon_version            = var.ebs-addon-version
   service_account_role_arn = var.ebs_csi_driver_role
 
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   tags = var.tags
-
-  timeouts {
-    create = "30m"
-    update = "30m"
-    delete = "30m"
-  }
 
   depends_on = [
     aws_eks_node_group.gmk-node-group
@@ -68,14 +59,6 @@ resource "aws_eks_addon" "cloudwatch_observability" {
   ]
 }
 
-# Service Accounts removed to avoid dependency cycle
-# Create manually after cluster is ready:
-# kubectl create sa ebs-csi-controller-sa -n kube-system
-# kubectl annotate sa ebs-csi-controller-sa -n kube-system eks.amazonaws.com/role-arn=<EBS_CSI_ROLE_ARN>
-# kubectl create sa ecr-pull-sa -n default  
-# kubectl annotate sa ecr-pull-sa -n default eks.amazonaws.com/role-arn=<ECR_ROLE_ARN>
-# kubectl create sa aws-load-balancer-controller -n kube-system
-# kubectl annotate sa aws-load-balancer-controller -n kube-system eks.amazonaws.com/role-arn=<LB_CONTROLLER_ROLE_ARN>
 
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/${var.cluster_name}/cluster"

@@ -18,7 +18,7 @@ output "eks_access_ecr_role_arn" {
 
 output "ebs_csi_driver_role_arn" {
   description = "ARN of the IAM role for EBS CSI Driver"
-  value       = var.deploy_secondary ? aws_iam_role.ebs_csi_driver[0].arn : null
+  value       = aws_iam_role.ebs_csi_driver[0].arn
 }
 
 output "rds_monitoring_role_arn" {
