@@ -36,12 +36,12 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 }
 
 
-resource "kubernetes_namespace" "amazon_cloudwatch" {
-  metadata {
-    name = "amazon-cloudwatch"
-  }
+# resource "kubernetes_namespace" "amazon_cloudwatch" {
+#   metadata {
+#     name = "amazon-cloudwatch"
+#   }
 
-}
+# }
 
 # resource "kubernetes_service_account" "cloudwatch-agent" {
 #   metadata {
@@ -71,7 +71,7 @@ resource "aws_eks_addon" "cloudwatch_observability" {
   
   cluster_name  = aws_eks_cluster.gmk-cluster.name
   addon_name    = "amazon-cloudwatch-observability"
-  
+
   service_account_role_arn = var.cloudwatch_agent_role
 
   resolve_conflicts_on_create = "OVERWRITE"
