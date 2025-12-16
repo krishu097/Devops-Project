@@ -32,6 +32,6 @@ output "aws_load_balancer_controller_arn" {
 }
 
 output "cloudwatch_agent_role_arn" {
-  description = "ARN of the IAM role for CloudWatch Agent"
+  description = "ARN of the IAM role for CloudWatch Agent & Fluent Bit"
   value       = aws_iam_role.cw_observability.arn
 }
