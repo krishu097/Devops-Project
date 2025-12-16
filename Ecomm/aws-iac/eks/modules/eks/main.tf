@@ -43,25 +43,25 @@ resource "kubernetes_namespace" "amazon_cloudwatch" {
 
 }
 
-resource "kubernetes_service_account" "cloudwatch-agent" {
-  metadata {
-    name      = "cloudwatch-agent"
-    namespace = kubernetes_namespace.amazon_cloudwatch.metadata[0].name
-    annotations = {
-      "eks.amazonaws.com/role-arn" = var.cloudwatch_agent_role
-    }
-  }
-}
+# resource "kubernetes_service_account" "cloudwatch-agent" {
+#   metadata {
+#     name      = "cloudwatch-agent"
+#     namespace = kubernetes_namespace.amazon_cloudwatch.metadata[0].name
+#     annotations = {
+#       "eks.amazonaws.com/role-arn" = var.cloudwatch_agent_role
+#     }
+#   }
+# }
 
-resource "kubernetes_service_account" "fluent_bit" {
-  metadata {
-    name      = "fluent-bit"
-    namespace = kubernetes_namespace.amazon_cloudwatch.metadata[0].name
-    annotations = {
-      "eks.amazonaws.com/role-arn" = var.cloudwatch_agent_role
-    }
-  }
-}
+# resource "kubernetes_service_account" "fluent_bit" {
+#   metadata {
+#     name      = "fluent-bit"
+#     namespace = kubernetes_namespace.amazon_cloudwatch.metadata[0].name
+#     annotations = {
+#       "eks.amazonaws.com/role-arn" = var.cloudwatch_agent_role
+#     }
+#   }
+# }
 
 
 
@@ -71,6 +71,8 @@ resource "aws_eks_addon" "cloudwatch_observability" {
   
   cluster_name  = aws_eks_cluster.gmk-cluster.name
   addon_name    = "amazon-cloudwatch-observability"
+  
+  service_account_role_arn = var.cloudwatch_agent_role
 
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
