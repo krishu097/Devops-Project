@@ -85,10 +85,10 @@ resource "aws_eks_addon" "cloudwatch_observability" {
     delete = "20m"
   }
 
-  depends_on = [
-    kubernetes_service_account.cloudwatch_agent,
-    kubernetes_service_account.fluent_bit
-  ]
+  # depends_on = [
+  #   kubernetes_service_account.cloudwatch_agent,
+  #   kubernetes_service_account.fluent_bit
+  # ]
 }
 
 
