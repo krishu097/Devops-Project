@@ -100,3 +100,7 @@ variable "environment" {
   type        = string
 }
 
+variable "cloudwatch_agent_role" {
+  description = "CloudWatch Agent Role ARN"
+  type        = string
+}

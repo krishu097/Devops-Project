@@ -35,7 +35,36 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   ]
 }
 
-# CloudWatch Observability add-on for container insights
+
+resource "kubernetes_namespace" "amazon_cloudwatch" {
+  metadata {
+    name = "amazon-cloudwatch"
+  }
+
+}
+
+resource "kubernetes_service_account" "cloudwatch-agent" {
+  metadata {
+    name      = "cloudwatch-agent"
+    namespace = kubernetes_namespace.amazon_cloudwatch.metadata[0].name
+    annotations = {
+      "eks.amazonaws.com/role-arn" = var.cloudwatch_agent_role
+    }
+  }
+}
+
+resource "kubernetes_service_account" "fluent_bit" {
+  metadata {
+    name      = "fluent-bit"
+    namespace = kubernetes_namespace.amazon_cloudwatch.metadata[0].name
+    annotations = {
+      "eks.amazonaws.com/role-arn" = var.cloudwatch_agent_role
+    }
+  }
+}
+
+
+
 resource "aws_eks_addon" "cloudwatch_observability" {
   # Deploy in both primary and secondary regions for monitoring
   count = 1
@@ -55,7 +84,8 @@ resource "aws_eks_addon" "cloudwatch_observability" {
   }
 
   depends_on = [
-    aws_eks_node_group.gmk-node-group
+    kubernetes_service_account.cloudwatch_agent,
+    kubernetes_service_account.fluent_bit
   ]
 }
 

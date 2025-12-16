@@ -30,3 +30,8 @@ output "aws_load_balancer_controller_arn" {
   description = "ARN of the IAM role for AWS Load Balancer Controller"
   value       = var.deploy_secondary ? aws_iam_role.aws_load_balancer_controller[0].arn : null
 }
+
+output "cloudwatch_agent_role_arn" {
+  description = "ARN of the IAM role for CloudWatch Agent"
+  value       = aws_iam_role.cw_observability.arn
+}

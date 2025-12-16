@@ -363,3 +363,35 @@ resource "aws_iam_role_policy_attachment" "dr_failover_lambda_basic" {
   role       = aws_iam_role.dr_failover_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+##############################################################################################
+resource "aws_iam_role" "cw_observability" {
+  name               = "${var.name_prefix}-cw-observability-role"
+  assume_role_policy = data.aws_iam_policy_document.cw_observability_assume_role.json
+  tags               = var.tags
+}
+
+data "aws_iam_policy_document" "cw_observability_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.eks[0].arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(var.oidc_provider_url, "https://", "")}:sub"
+      values = [
+        "system:serviceaccount:amazon-cloudwatch:cloudwatch-agent",
+        "system:serviceaccount:amazon-cloudwatch:fluent-bit"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "cw_observability" {
+  role       = aws_iam_role.cw_observability.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
