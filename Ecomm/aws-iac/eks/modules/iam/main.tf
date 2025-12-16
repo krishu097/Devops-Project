@@ -135,7 +135,7 @@ resource "aws_iam_role_policy_attachment" "eks_ecr_attach" {
 
 ########################EBS-CSI-DRIVER-POLICY#####################################################
 data "aws_iam_policy_document" "ebs_csi_assume_role" {
-  count = var.deploy_secondary ? 1 : 0
+  count = 1
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
@@ -154,24 +154,24 @@ data "aws_iam_policy_document" "ebs_csi_assume_role" {
 }
 
 resource "aws_iam_role" "ebs_csi_driver" {
-  count              = var.deploy_secondary ? 1 : 0
+  count              = 1
   name               = "${var.name_prefix}-ebs-csi-driver-role"
   assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "ebs_csi_driver_policy" {
-  count      = var.deploy_secondary ? 1 : 0
+  count      = 1
   role       = aws_iam_role.ebs_csi_driver[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
 data "tls_certificate" "oidc" {
-  count = var.deploy_secondary ? 1 : 0
+  count = 1
   url   = var.oidc_provider_url
 }
 
 resource "aws_iam_openid_connect_provider" "eks" {
-  count           = var.deploy_secondary ? 1 : 0
+  count           = 1
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.oidc[0].certificates[0].sha1_fingerprint]
   url             = var.oidc_provider_url

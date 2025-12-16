@@ -20,7 +20,7 @@ resource "aws_eks_cluster" "gmk-cluster" {
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
-  count = var.deploy_secondary ? 0 : 1
+  count = 1
   
   cluster_name  = aws_eks_cluster.gmk-cluster.name
   addon_name    = "aws-ebs-csi-driver"
