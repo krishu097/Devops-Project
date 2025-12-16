@@ -68,53 +68,14 @@ resource "aws_eks_addon" "cloudwatch_observability" {
   ]
 }
 
-resource "kubernetes_service_account" "ebs_csi_sa" {
-  metadata {
-    name      = "ebs-csi-controller-sa"
-    namespace = "kube-system"
-    annotations = {
-      "eks.amazonaws.com/role-arn" = var.ebs_csi_driver_role
-    }
-  }
-   depends_on = [
-    aws_eks_cluster.gmk-cluster,
-    aws_eks_node_group.gmk-node-group
-  ]
-}
-
-
-resource "kubernetes_service_account" "ecr_pull_sa" {
-  metadata {
-    name      = "ecr-pull-sa"
-    namespace = "default"
-    annotations = {
-      "eks.amazonaws.com/role-arn" = var.eks_ecr_access_role
-    }
-  }
-   depends_on = [
-    aws_eks_cluster.gmk-cluster,
-    aws_eks_node_group.gmk-node-group
-  ]
-}
-
-resource "kubernetes_service_account" "aws_load_balancer_controller" {
-  metadata {
-    name      = "aws-load-balancer-controller"
-    namespace = "kube-system"
-    annotations = {
-      "eks.amazonaws.com/role-arn" = var.eks_aws_load_balancer_controller_role
-    }
-    labels = {
-      "app.kubernetes.io/name" = "aws-load-balancer-controller"
-      "app.kubernetes.io/component" = "controller"
-    }
-  }
-
-  depends_on = [
-    aws_eks_cluster.gmk-cluster,
-    aws_eks_node_group.gmk-node-group
-  ]
-}
+# Service Accounts removed to avoid dependency cycle
+# Create manually after cluster is ready:
+# kubectl create sa ebs-csi-controller-sa -n kube-system
+# kubectl annotate sa ebs-csi-controller-sa -n kube-system eks.amazonaws.com/role-arn=<EBS_CSI_ROLE_ARN>
+# kubectl create sa ecr-pull-sa -n default  
+# kubectl annotate sa ecr-pull-sa -n default eks.amazonaws.com/role-arn=<ECR_ROLE_ARN>
+# kubectl create sa aws-load-balancer-controller -n kube-system
+# kubectl annotate sa aws-load-balancer-controller -n kube-system eks.amazonaws.com/role-arn=<LB_CONTROLLER_ROLE_ARN>
 
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
