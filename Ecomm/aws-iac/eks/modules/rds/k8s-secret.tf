@@ -17,6 +17,12 @@ resource "kubernetes_secret" "rds_connection" {
 
   type = "Opaque"
   
+  lifecycle {
+    replace_triggered_by = [
+      aws_db_proxy.rds_proxy.endpoint
+    ]
+  }
+  
   depends_on = [
     aws_db_proxy.rds_proxy
   ]
