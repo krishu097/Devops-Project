@@ -70,6 +70,32 @@ resource "aws_kms_key" "rds_replica_key" {
   }
 }
 
+# Security group for RDS Proxy
+resource "aws_security_group" "rds_proxy_sg" {
+  name        = "${var.name_prefix}-rds-proxy-sg"
+  description = "Security group for RDS Proxy"
+  vpc_id      = data.aws_subnets.db_subnets.vpc_id
+
+  ingress {
+    description = "MySQL from EKS nodes"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/22"]  # VPC CIDR
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.name_prefix}-rds-proxy-sg"
+  }
+}
+
 # RDS Proxy for connection pooling and management
 resource "aws_db_proxy" "rds_proxy" {
   name                   = "ecomm-uat-rds-proxy"
@@ -82,7 +108,8 @@ resource "aws_db_proxy" "rds_proxy" {
   
   role_arn               = aws_iam_role.rds_proxy_role.arn
   vpc_subnet_ids         = data.aws_subnets.db_subnets.ids
-  require_tls            = true
+  vpc_security_group_ids = [aws_security_group.rds_proxy_sg.id]
+  require_tls            = false
   
   tags = {
     Name = "${var.name_prefix}-rds-proxy"
