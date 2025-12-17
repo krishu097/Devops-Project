@@ -23,3 +23,8 @@ output "mysql_replica_region" {
   description = "MySQL read replica region"
   value       = var.aws_region_rds_replica
 }
+
+output "rds_proxy_endpoint" {
+  description = "RDS Proxy endpoint for application connections"
+  value       = aws_db_proxy.rds_proxy.endpoint
+}

@@ -115,4 +115,10 @@ variable "github_repo" {
   type        = string
 }
 
+variable "create_k8s_secret" {
+  description = "Create Kubernetes secret for RDS connection"
+  type        = bool
+  default     = true
+}
+
 

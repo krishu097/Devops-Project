@@ -18,3 +18,8 @@ output "mysql_endpoint" {
   description = "RDS MySQL endpoint"
   value       = module.rds.mysql_endpoint
 }
+
+output "rds_proxy_endpoint" {
+  description = "RDS Proxy endpoint (recommended for applications)"
+  value       = module.rds.rds_proxy_endpoint
+}

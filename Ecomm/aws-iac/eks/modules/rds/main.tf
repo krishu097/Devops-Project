@@ -69,3 +69,73 @@ resource "aws_kms_key" "rds_replica_key" {
     Purpose = "DR-Encryption"
   }
 }
+
+# RDS Proxy for connection pooling and management
+resource "aws_db_proxy" "rds_proxy" {
+  name                   = "${var.name_prefix}-rds-proxy"
+  engine_family         = "MYSQL"
+  
+  auth {
+    auth_scheme = "SECRETS"
+    secret_arn  = aws_secretsmanager_secret.mysql_secret.arn
+  }
+  
+  role_arn               = aws_iam_role.rds_proxy_role.arn
+  vpc_subnet_ids         = var.db_subnet_group_name == "default" ? [] : [for s in data.aws_subnets.db_subnets.ids : s]
+  require_tls            = true
+  
+  target {
+    db_instance_identifier = aws_db_instance.primary.identifier
+  }
+  
+  tags = {
+    Name = "${var.name_prefix}-rds-proxy"
+    Purpose = "Connection-Pooling"
+  }
+}
+
+# Data source to get subnet IDs from subnet group
+data "aws_subnets" "db_subnets" {
+  filter {
+    name   = "tag:Name"
+    values = ["*private*"]
+  }
+}
+
+# IAM role for RDS Proxy
+resource "aws_iam_role" "rds_proxy_role" {
+  name = "${var.name_prefix}-rds-proxy-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "rds.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM policy for RDS Proxy to access Secrets Manager
+resource "aws_iam_role_policy" "rds_proxy_policy" {
+  name = "${var.name_prefix}-rds-proxy-policy"
+  role = aws_iam_role.rds_proxy_role.id
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = aws_secretsmanager_secret.mysql_secret.arn
+      }
+    ]
+  })
+}
