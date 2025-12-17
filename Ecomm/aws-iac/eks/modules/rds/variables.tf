@@ -70,3 +70,8 @@ variable "create_k8s_secret" {
   type        = bool
   default     = false
 }
+
+variable "vpc_id" {
+  description = "VPC ID for RDS Proxy security group"
+  type        = string
+}

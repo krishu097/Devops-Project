@@ -74,7 +74,7 @@ resource "aws_kms_key" "rds_replica_key" {
 resource "aws_security_group" "rds_proxy_sg" {
   name        = "${var.name_prefix}-rds-proxy-sg"
   description = "Security group for RDS Proxy"
-  vpc_id      = data.aws_subnets.db_subnets.vpc_id
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "MySQL from EKS nodes"
