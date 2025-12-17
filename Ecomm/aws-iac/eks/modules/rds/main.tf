@@ -81,17 +81,30 @@ resource "aws_db_proxy" "rds_proxy" {
   }
   
   role_arn               = aws_iam_role.rds_proxy_role.arn
-  vpc_subnet_ids         = var.db_subnet_group_name == "default" ? [] : [for s in data.aws_subnets.db_subnets.ids : s]
+  vpc_subnet_ids         = data.aws_subnets.db_subnets.ids
   require_tls            = true
-  
-  target {
-    db_instance_identifier = aws_db_instance.primary.identifier
-  }
   
   tags = {
     Name = "${var.name_prefix}-rds-proxy"
     Purpose = "Connection-Pooling"
   }
+}
+
+# RDS Proxy Target
+resource "aws_db_proxy_default_target_group" "rds_proxy_target" {
+  db_proxy_name = aws_db_proxy.rds_proxy.name
+  
+  connection_pool_config {
+    max_connections_percent      = 100
+    max_idle_connections_percent = 50
+    connection_borrow_timeout    = 120
+  }
+}
+
+resource "aws_db_proxy_target" "rds_proxy_target" {
+  db_instance_identifier = aws_db_instance.primary.identifier
+  db_proxy_name          = aws_db_proxy.rds_proxy.name
+  target_group_name      = aws_db_proxy_default_target_group.rds_proxy_target.name
 }
 
 # Data source to get subnet IDs from subnet group
