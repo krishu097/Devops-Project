@@ -13,3 +13,8 @@ output "cluster_endpoint" {
   description = "Endpoint for EKS control plane"
   value       = module.eks.cluster_endpoint
 }
+
+output "mysql_endpoint" {
+  description = "RDS MySQL endpoint"
+  value       = module.rds.mysql_endpoint
+}
