@@ -72,7 +72,7 @@ resource "aws_kms_key" "rds_replica_key" {
 
 # RDS Proxy for connection pooling and management
 resource "aws_db_proxy" "rds_proxy" {
-  name                   = "${var.name_prefix}-rds-proxy"
+  name                   = "ecomm-uat-rds-proxy"
   engine_family         = "MYSQL"
   
   auth {
@@ -117,7 +117,7 @@ data "aws_subnets" "db_subnets" {
 
 # IAM role for RDS Proxy
 resource "aws_iam_role" "rds_proxy_role" {
-  name = "${var.name_prefix}-rds-proxy-role"
+  name = "ecomm-uat-rds-proxy-role"
   
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -135,7 +135,7 @@ resource "aws_iam_role" "rds_proxy_role" {
 
 # IAM policy for RDS Proxy to access Secrets Manager
 resource "aws_iam_role_policy" "rds_proxy_policy" {
-  name = "${var.name_prefix}-rds-proxy-policy"
+  name = "ecomm-uat-rds-proxy-policy"
   role = aws_iam_role.rds_proxy_role.id
   
   policy = jsonencode({
