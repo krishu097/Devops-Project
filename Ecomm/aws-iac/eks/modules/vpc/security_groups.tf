@@ -59,7 +59,7 @@ resource "aws_security_group" "mysql" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [var.rds_proxy_sg_id]
+    security_groups = var.rds_proxy_sg_id
   }
 
   egress {
