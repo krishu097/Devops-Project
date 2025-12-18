@@ -75,3 +75,8 @@ variable "vpc_id" {
   description = "VPC ID for RDS Proxy security group"
   type        = string
 }
+
+variable "eks_nodes_security_group_id" {
+  description = "EKS node security group ID"
+  type        = string
+}

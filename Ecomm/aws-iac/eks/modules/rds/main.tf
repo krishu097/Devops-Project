@@ -81,7 +81,7 @@ resource "aws_security_group" "rds_proxy_sg" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = var.db_security_group_id  # Allow from same SG as RDS
+    security_groups = [var.eks_nodes_security_group_id]  
   }
 
   egress {
