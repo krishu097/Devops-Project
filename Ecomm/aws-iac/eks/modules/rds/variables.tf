@@ -39,10 +39,10 @@ variable "db_subnet_group_name" {
   description = "The subnet IDs for the RDS instance"
   type        = string
 }
-variable "db_security_group_id" {
-  description = "The security group ID for the RDS instance"
-  type        = list(string)
-}
+# variable "db_security_group_id" {
+#   description = "The security group ID for the RDS instance"
+#   type        = list(string)
+# }
 
 variable "name_prefix" {
   description = "Prefix for resource names"
@@ -54,10 +54,10 @@ variable "aws_region_rds_replica" {
   type        = string
 }
 
-variable "replica_db_subnet_group_name" {
-  description = "The subnet group name for the RDS read replica"
-  type        = string
-}
+# variable "replica_db_subnet_group_name" {
+#   description = "The subnet group name for the RDS read replica"
+#   type        = string
+# }
 
 variable "deploy_secondary" {
   description = "Deploy secondary region resources for DR"
@@ -78,5 +78,5 @@ variable "vpc_id" {
 
 variable "eks_nodes_security_group_id" {
   description = "EKS node security group ID"
-  type        = string
+  type        = list(string)
 }

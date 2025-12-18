@@ -23,10 +23,10 @@ output "nodes_security_group_id" {
   value       = aws_security_group.nodes.id
 }
 
-output "mysql_security_group_id" {
-  description = "Name of the RDS DB subnet group"
-  value       = aws_security_group.mysql.id
-}
+# output "mysql_security_group_id" {
+#   description = "Name of the RDS DB subnet group"
+#   value       = aws_security_group.mysql.id
+# }
 
 output "db_subnet_group_name" {
   description = "Name of the RDS DB subnet group"

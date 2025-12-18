@@ -54,3 +54,8 @@ variable "deploy_secondary" {
   type        = bool
   default     = false
 }
+
+variable "rds_proxy_sg_id" {
+  description = "Security group ID for RDS Proxy"
+  type        = list(string)
+}

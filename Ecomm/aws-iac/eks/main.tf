@@ -16,7 +16,7 @@ module "vpc" {
 
   db_instance_identifier = var.db_instance_identifier
   deploy_secondary       = var.deploy_secondary
-
+  rds_proxy_sg_id        = module.rds.rds_proxy_sg_id
   tags = local.common_tags
 }
 

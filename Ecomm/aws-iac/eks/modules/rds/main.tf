@@ -20,7 +20,7 @@ resource "aws_db_instance" "primary" {
   db_name                 = var.db_name
   storage_encrypted       = true
   db_subnet_group_name    = var.db_subnet_group_name
-  vpc_security_group_ids  = var.db_security_group_id
+  vpc_security_group_ids  = [aws_security_group.rds_proxy_sg.id]
   monitoring_role_arn     = var.rds_monitoring_role_arn
   monitoring_interval     = 30
 
