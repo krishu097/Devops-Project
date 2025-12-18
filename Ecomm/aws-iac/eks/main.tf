@@ -81,7 +81,7 @@ module "rds" {
   db_engine              = var.db_engine
   db_subnet_group_name   = module.vpc.db_subnet_group_name
   rds_monitoring_role_arn = module.iam.rds_monitoring_role_arn
-  eks_nodes_security_group_id = module.vpc.nodes_security_group_id
+  eks_nodes_security_group_id = [module.vpc.nodes_security_group_id]
   replica_db_subnet_group_name = module.vpc.replica_db_subnet_group_name
   deploy_secondary             = var.deploy_secondary
   create_k8s_secret           = var.create_k8s_secret
