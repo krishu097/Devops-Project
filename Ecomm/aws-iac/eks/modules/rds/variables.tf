@@ -6,7 +6,7 @@ variable "db_instance_identifier" {
 variable "db_name" {
   description = "Database name"
   type        = string
-  default     = "mydatabase"
+  default     = "businessproject"
 }
 
 variable "db_username" {
